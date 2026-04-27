@@ -1,0 +1,74 @@
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+
+type CookieToSet = { name: string; value: string; options?: CookieOptions };
+
+function envIsConfigured() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return Boolean(
+    url && key &&
+    !url.includes("placeholder") &&
+    !key.includes("placeholder")
+  );
+}
+
+export async function updateSession(request: NextRequest) {
+  const supabaseResponse = NextResponse.next({ request });
+  const path = request.nextUrl.pathname;
+  const isAppRoute =
+    path.startsWith("/learn") ||
+    path.startsWith("/lesson") ||
+    path.startsWith("/me") ||
+    path.startsWith("/friends") ||
+    path.startsWith("/leaderboard") ||
+    path.startsWith("/onboarding");
+
+  // Without real Supabase credentials, skip auth — public pages still render.
+  if (!envIsConfigured()) {
+    if (isAppRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", path);
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  let response = supabaseResponse;
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet: CookieToSet[]) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    user = null;
+  }
+
+  if (!user && isAppRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", path);
+    return NextResponse.redirect(url);
+  }
+
+  return response;
+}

@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Be Vietnam Pro", "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Neon Lotus palette */
+  --color-lotus-50: #fdf2f5;
+  --color-lotus-100: #fbe5eb;
+  --color-lotus-200: #f7c8d3;
+  --color-lotus-300: #f5a6b8;
+  --color-lotus-400: #ee7d96;
+  --color-lotus-500: #e25777;
+  --color-lotus-600: #c93e60;
+  --color-lotus-700: #a8304e;
+  --color-lotus-800: #872942;
+  --color-lotus-900: #6e2538;
+
+  --color-jade-50: #ecfdf6;
+  --color-jade-100: #d0fbe9;
+  --color-jade-200: #a4f4d3;
+  --color-jade-300: #6be8b8;
+  --color-jade-400: #33d39a;
+  --color-jade-500: #14b67e;
+  --color-jade-600: #0e7c66;
+  --color-jade-700: #0c6253;
+  --color-jade-800: #0c4d43;
+  --color-jade-900: #0a3f37;
+
+  --color-gold-50: #fdf9ec;
+  --color-gold-100: #faf0c8;
+  --color-gold-200: #f5e08c;
+  --color-gold-300: #efc94f;
+  --color-gold-400: #e9b949;
+  --color-gold-500: #d29a26;
+  --color-gold-600: #ad771d;
+  --color-gold-700: #89591b;
+  --color-gold-800: #71471d;
+  --color-gold-900: #5f3b1d;
+
+  --color-lacquer: #1a1423;
+  --color-lacquer-soft: #261d33;
+  --color-river-mist: #c7e7e1;
+  --color-silk-cream: #faf6ec;
+
+  /* Tone colors — paired with shape glyph in <ToneBadge> */
+  --color-tone-ngang: #64748b;   /* slate */
+  --color-tone-sac: #ef4444;     /* red */
+  --color-tone-huyen: #3b82f6;   /* blue */
+  --color-tone-hoi: #f97316;     /* orange */
+  --color-tone-nga: #a855f7;     /* purple — merges with hoi in Southern */
+  --color-tone-nang: #22c55e;    /* green */
+
+  /* Semantic */
+  --color-bg: var(--color-silk-cream);
+  --color-fg: var(--color-lacquer);
+  --color-card: #ffffff;
+  --color-muted: var(--color-river-mist);
+  --color-primary: var(--color-lotus-400);
+  --color-primary-fg: #ffffff;
+  --color-success: var(--color-jade-500);
+  --color-accent: var(--color-gold-400);
+  --color-border: rgba(26, 20, 35, 0.08);
+  --color-ring: var(--color-lotus-300);
+
+  --radius-card: 1.25rem;
+  --radius-pill: 999px;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html, body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: var(--color-lotus-200);
+    color: var(--color-lacquer);
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-lotus-400);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-display); }
+  .font-mono { font-family: var(--font-mono); }
+
+  .bg-lacquer-grad {
+    background-image:
+      radial-gradient(circle at 20% 0%, color-mix(in oklab, var(--color-lotus-300) 18%, transparent) 0%, transparent 35%),
+      radial-gradient(circle at 80% 90%, color-mix(in oklab, var(--color-jade-300) 18%, transparent) 0%, transparent 40%),
+      var(--color-silk-cream);
+  }
+
+  .card-soft {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 1px 0 rgba(26, 20, 35, 0.04), 0 12px 28px -16px rgba(26, 20, 35, 0.18);
+  }
+
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
