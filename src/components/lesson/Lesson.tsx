@@ -34,9 +34,23 @@ type Phase =
   | { kind: "feedback"; correct: boolean; exerciseRef: Exercise }
   | { kind: "done" };
 
-export function Lesson({ lesson: rawLesson, demoMode = false }: { lesson: LessonType; demoMode?: boolean }) {
+type LessonMode = "normal" | "speed";
+
+const SPEED_INITIAL_SECONDS = 45;
+const SPEED_BONUS_SECONDS = 4;
+
+export function Lesson({
+  lesson: rawLesson,
+  demoMode = false,
+  mode = "normal",
+}: {
+  lesson: LessonType;
+  demoMode?: boolean;
+  mode?: LessonMode;
+}) {
   const router = useRouter();
   const exitHref = demoMode ? "/demo" : "/learn";
+  const isSpeed = mode === "speed";
   // SSR / first paint use the deterministic original; after mount we re-shuffle client-side.
   // This avoids a hydration mismatch from Math.random() in shuffleLessonForReplay.
   const [lesson, setLesson] = useState<LessonType>(rawLesson);
@@ -44,15 +58,17 @@ export function Lesson({ lesson: rawLesson, demoMode = false }: { lesson: Lesson
     setLesson(shuffleLessonForReplay(rawLesson));
   }, [rawLesson]);
   const hasTips = useMemo(() => {
+    if (isSpeed) return false; // Speed mode skips the Tips screen entirely
     const vocab = deriveVocabFromLesson(rawLesson);
     return vocab.length > 0 || (rawLesson.tips?.grammar?.length ?? 0) > 0;
-  }, [rawLesson]);
+  }, [rawLesson, isSpeed]);
   const [index, setIndex] = useState(0);
   const [hearts, setHearts] = useState(5);
   const [score, setScore] = useState(0);
   const [correctIds, setCorrectIds] = useState<string[]>([]);
   const [statXp, setStatXp] = useState<Partial<Record<StatKey, number>>>({});
   const [phase, setPhase] = useState<Phase>(hasTips ? { kind: "tips" } : { kind: "playing" });
+  const [secondsLeft, setSecondsLeft] = useState(SPEED_INITIAL_SECONDS);
   const [pending, startTransition] = useTransition();
   const [savedResult, setSavedResult] = useState<{
     totalXp: number;
@@ -78,10 +94,22 @@ export function Lesson({ lesson: rawLesson, demoMode = false }: { lesson: Lesson
         ...prev,
         [ref.trainsStat]: (prev[ref.trainsStat] ?? 0) + xpFor,
       }));
-      setPhase({ kind: "feedback", correct: true, exerciseRef: ref });
-    } else {
+      if (isSpeed) {
+        setSecondsLeft((s) => Math.min(SPEED_INITIAL_SECONDS + 30, s + SPEED_BONUS_SECONDS));
+      }
+    } else if (!isSpeed) {
       setHearts((h) => Math.max(0, h - 1));
-      setPhase({ kind: "feedback", correct: false, exerciseRef: ref });
+    }
+    if (isSpeed) {
+      // Speed mode skips the feedback panel and advances immediately.
+      if (index + 1 >= total) {
+        finalize();
+      } else {
+        setIndex((i) => i + 1);
+        setPhase({ kind: "playing" });
+      }
+    } else {
+      setPhase({ kind: "feedback", correct, exerciseRef: ref });
     }
   }
 
@@ -115,6 +143,19 @@ export function Lesson({ lesson: rawLesson, demoMode = false }: { lesson: Lesson
     });
   }
 
+  // Speed-mode countdown — declared after `finalize` so the effect can call it.
+  useEffect(() => {
+    if (!isSpeed || phase.kind !== "playing") return;
+    if (secondsLeft <= 0) {
+      finalize();
+      return;
+    }
+    const t = window.setTimeout(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => clearTimeout(t);
+    // finalize/state setters are stable; depending on phase.kind + secondsLeft is sufficient
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSpeed, phase.kind, secondsLeft]);
+
   if (phase.kind === "done") {
     return (
       <LessonResult
@@ -145,11 +186,33 @@ export function Lesson({ lesson: rawLesson, demoMode = false }: { lesson: Lesson
         >
           <X size={20} />
         </Link>
-        <Progress value={progress} className="flex-1 h-3" />
-        <div className="flex items-center gap-1 text-[var(--color-lotus-500)]">
-          <Heart size={20} className="fill-current" />
-          <span className="font-display font-bold tabular-nums">{hearts}</span>
-        </div>
+        {isSpeed ? (
+          <div className="flex flex-1 items-center justify-between rounded-full border-2 border-[var(--color-gold-300)] bg-gradient-to-r from-[var(--color-gold-50)] to-[var(--color-lotus-50)] px-3 py-1.5">
+            <span className="font-display text-xs font-bold uppercase tracking-wider text-[var(--color-gold-700)]">
+              Tốc Độ · Speed
+            </span>
+            <span
+              className={`font-display text-xl font-extrabold tabular-nums ${
+                secondsLeft <= 10 ? "text-[var(--color-lotus-600)]" : "text-[var(--color-lacquer)]"
+              }`}
+            >
+              {secondsLeft}s
+            </span>
+          </div>
+        ) : (
+          <Progress value={progress} className="flex-1 h-3" />
+        )}
+        {!isSpeed && (
+          <div className="flex items-center gap-1 text-[var(--color-lotus-500)]">
+            <Heart size={20} className="fill-current" />
+            <span className="font-display font-bold tabular-nums">{hearts}</span>
+          </div>
+        )}
+        {isSpeed && (
+          <div className="flex items-center gap-1 text-[var(--color-gold-500)]">
+            <span className="font-display font-bold tabular-nums">{score}</span>
+          </div>
+        )}
       </div>
 
       {/* Exercise */}

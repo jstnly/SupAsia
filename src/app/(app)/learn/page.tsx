@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db/client";
 import { profiles, progress } from "@/lib/db/schema";
@@ -54,6 +54,22 @@ export default async function LearnPage() {
           </Link>
         )}
       </div>
+
+      <Link
+        href="/speed"
+        className="card-soft flex items-center gap-3 p-4 transition-transform hover:-translate-y-0.5"
+      >
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--color-gold-400)] to-[var(--color-lotus-400)] text-white">
+          <Zap size={20} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-display text-sm font-bold">Speed Lesson · Tốc Độ</div>
+          <div className="text-xs text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
+            Race the clock — 45s timer, +4s per correct
+          </div>
+        </div>
+        <ArrowRight size={16} className="text-[var(--color-gold-500)]" />
+      </Link>
 
       <WorldMap completedLessonIds={completedLessonIds} avatarVariant={profile.avatarVariant} />
     </div>
