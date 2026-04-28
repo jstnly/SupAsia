@@ -33,7 +33,79 @@ export type ToneMatchExercise = ExerciseBase & {
   correctTone: ToneId;
 };
 
-export type Exercise = ListenExercise | TranslateExercise | ToneMatchExercise;
+export type SpeakExercise = ExerciseBase & {
+  kind: "speak";
+  targetText: string;
+  targetTone: ToneId;
+  audioText: string;
+  dialectMerged?: boolean;
+};
+
+export type PairMatchExercise = ExerciseBase & {
+  kind: "pair-match";
+  pairs: { left: string; right: string; audioText?: string }[];
+};
+
+export type FillBlankExercise = ExerciseBase & {
+  kind: "fill-blank";
+  sentence: string; // use "___" to mark the blank
+  options: string[];
+  correct: number;
+  audioText?: string; // full sentence to play (optional)
+  englishHint?: string;
+};
+
+export type StoryLineNode = {
+  id: string;
+  kind: "line";
+  speaker: string; // "narrator", "you", or a character name like "Mai"
+  text: string;
+  textEnglish?: string;
+  audioText?: string;
+  next: string;
+};
+
+export type StoryChoiceNode = {
+  id: string;
+  kind: "choice";
+  prompt: string;
+  promptEnglish?: string;
+  options: {
+    text: string;
+    textEnglish?: string;
+    correct: boolean;
+    next: string;
+  }[];
+};
+
+export type StoryEndNode = {
+  id: string;
+  kind: "end";
+  text: string;
+  textEnglish?: string;
+};
+
+export type StoryNode = StoryLineNode | StoryChoiceNode | StoryEndNode;
+
+export type ShortStoryExercise = ExerciseBase & {
+  kind: "story";
+  startId: string;
+  nodes: StoryNode[];
+};
+
+export type Exercise =
+  | ListenExercise
+  | TranslateExercise
+  | ToneMatchExercise
+  | SpeakExercise
+  | PairMatchExercise
+  | FillBlankExercise
+  | ShortStoryExercise;
+
+export type LessonTips = {
+  vocab?: { word: string; meaning: string; audioText?: string; toneHint?: string }[];
+  grammar?: { pattern: string; meaning: string; example?: string }[];
+};
 
 export type Lesson = {
   id: string;
@@ -43,6 +115,7 @@ export type Lesson = {
   titleEnglish: string;
   exercises: Exercise[];
   xpReward: number;
+  tips?: LessonTips;
 };
 
 export type Unit = {

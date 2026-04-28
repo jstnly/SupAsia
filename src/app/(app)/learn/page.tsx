@@ -23,11 +23,18 @@ export default async function LearnPage() {
     .where(eq(progress.userId, user.id));
   const completedLessonIds = completedRows.filter((r) => r.status === "completed").map((r) => r.lessonId);
 
-  // Find the next available lesson — first incomplete lesson in unlocked units (u0, u1).
+  // Find the next available lesson — first incomplete lesson in any unit whose
+  // predecessors are all completed (the same gating as WorldMap).
   const completedSet = new Set(completedLessonIds);
+  const availableUnitIds = new Set<string>();
+  let allPrevComplete = true;
+  for (const u of UNITS) {
+    if (allPrevComplete) availableUnitIds.add(u.id);
+    if (!u.lessons.every((l) => completedSet.has(l.id))) allPrevComplete = false;
+  }
   const nextLesson =
     UNITS.flatMap((u) => u.lessons)
-      .find((l) => !completedSet.has(l.id) && (l.unitId === "u0" || l.unitId === "u1"));
+      .find((l) => !completedSet.has(l.id) && availableUnitIds.has(l.unitId));
 
   return (
     <div className="space-y-6">

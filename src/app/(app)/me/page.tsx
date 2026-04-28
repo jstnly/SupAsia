@@ -7,9 +7,13 @@ import { MascotSlot } from "@/components/game/MascotSlot";
 import { StatRadar } from "@/components/game/StatRadar";
 import { XPBar } from "@/components/game/XPBar";
 import { LEVEL_UNLOCKS } from "@/lib/game/xp";
-import { Coins, Gem, Flame } from "lucide-react";
+import { ACHIEVEMENTS } from "@/lib/game/achievements";
+import { Coins, Gem, Flame, ChevronRight, Trophy } from "lucide-react";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { formatNumber } from "@/lib/utils";
 import { SignOutButton } from "./SignOutButton";
+import { AccessibilityToggle } from "./AccessibilityToggle";
 
 export default async function MePage() {
   const supabase = await createClient();
@@ -71,12 +75,72 @@ export default async function MePage() {
               </li>
             ))}
           </ul>
+          <Link
+            href="/skills"
+            className="mt-3 flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-white px-3 py-2 text-sm hover:-translate-y-0.5 transition-transform"
+          >
+            <span className="font-display font-semibold">Open skill tree</span>
+            <ChevronRight size={16} className="text-[var(--color-lotus-600)]" />
+          </Link>
           <h2 className="font-display text-lg font-bold mt-6 mb-2">League</h2>
           <div className="rounded-2xl bg-gradient-to-br from-[var(--color-lotus-100)] to-[var(--color-gold-100)] p-3">
             <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-lotus-700)]">Bậc Trà Sữa</div>
             <div className="font-display font-bold capitalize">{profile.league.replace(/-/g, " ")}</div>
           </div>
         </div>
+      </div>
+
+      <div className="card-soft p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display text-lg font-bold flex items-center gap-2">
+            <Trophy size={18} className="text-[var(--color-gold-500)]" />
+            Achievements
+          </h2>
+          <span className="font-display text-xs font-semibold tabular-nums text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
+            {(profile.earnedAchievements ?? []).length}/{ACHIEVEMENTS.length}
+          </span>
+        </div>
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {ACHIEVEMENTS.map((a) => {
+            const earned = (profile.earnedAchievements ?? []).includes(a.id);
+            return (
+              <li
+                key={a.id}
+                className={cn(
+                  "flex items-start gap-3 rounded-2xl border-2 p-3 transition-all",
+                  earned
+                    ? "border-[var(--color-gold-300)] bg-gradient-to-br from-[var(--color-gold-50)] to-[var(--color-lotus-50)]"
+                    : "border-[var(--color-border)] bg-white opacity-60",
+                )}
+              >
+                <div
+                  className={cn(
+                    "grid h-9 w-9 shrink-0 place-items-center rounded-full",
+                    earned
+                      ? "bg-[var(--color-gold-400)] text-white"
+                      : "bg-[color-mix(in_oklab,var(--color-lacquer)_8%,transparent)] text-[color-mix(in_oklab,var(--color-lacquer)_40%,transparent)]",
+                  )}
+                >
+                  <Trophy size={16} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-display text-sm font-semibold">
+                    {a.name}{" "}
+                    <span className="font-normal opacity-60">({a.nameEnglish})</span>
+                  </div>
+                  <div className="text-xs text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
+                    {a.description}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div className="card-soft p-5">
+        <h2 className="font-display text-lg font-bold mb-3">Accessibility</h2>
+        <AccessibilityToggle />
       </div>
 
       <div className="card-soft p-5">

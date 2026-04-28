@@ -33,6 +33,8 @@ export const profiles = pgTable("profiles", {
   streakFreezes: integer("streak_freezes").notNull().default(0),
   lastLessonAt: timestamp("last_lesson_at"),
   league: text("league").notNull().default("tra-da"),
+  unlockedSkillNodes: jsonb("unlocked_skill_nodes").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  earnedAchievements: jsonb("earned_achievements").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   onboardedAt: timestamp("onboarded_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

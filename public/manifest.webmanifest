@@ -1,0 +1,20 @@
+{
+  "name": "Biết Tiếng Việt — Learn Vietnamese RPG",
+  "short_name": "Biết Tiếng Việt",
+  "description": "Learn Southern Vietnamese as an RPG: level up stats, unlock cities, conversational in 2-3 months.",
+  "start_url": "/learn",
+  "display": "standalone",
+  "background_color": "#FAF6EC",
+  "theme_color": "#FAF6EC",
+  "orientation": "portrait",
+  "lang": "en",
+  "categories": ["education", "games"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

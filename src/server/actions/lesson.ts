@@ -7,8 +7,12 @@ import { progress, xpEvents, profiles, stats } from "@/lib/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import type { StatKey } from "@/lib/game/xp";
 import { getLesson } from "@/lib/curriculum/units";
+import { xpMultiplierFor } from "@/lib/game/skill-tree";
+import { evalEarnedAchievements } from "@/lib/game/achievements";
 
-export async function completeLesson(lessonId: string, score: number, statXp: Partial<Record<StatKey, number>>) {
+const PER_EXERCISE_BASE_XP = 5;
+
+export async function completeLesson(lessonId: string, correctExerciseIds: string[]) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("not authenticated");
@@ -16,8 +20,26 @@ export async function completeLesson(lessonId: string, score: number, statXp: Pa
   const lesson = getLesson(lessonId);
   if (!lesson) throw new Error("lesson not found");
 
-  const totalXp = lesson.xpReward;
+  // Look up unlocked skill nodes for XP modifiers
+  const [profileRow] = await db
+    .select({ unlockedSkillNodes: profiles.unlockedSkillNodes })
+    .from(profiles)
+    .where(eq(profiles.id, user.id));
+  const unlockedNodes = profileRow?.unlockedSkillNodes ?? [];
+
+  const correctSet = new Set(correctExerciseIds);
+  const correctExercises = lesson.exercises.filter((e) => correctSet.has(e.id));
+  const score = correctExercises.length;
   const completed = score >= Math.ceil(lesson.exercises.length * 0.8);
+
+  // Compute per-stat XP from each correct exercise, applying skill-tree multipliers.
+  const statXp: Partial<Record<StatKey, number>> = {};
+  for (const ex of correctExercises) {
+    const mul = xpMultiplierFor(ex.kind, unlockedNodes);
+    const awarded = Math.round(PER_EXERCISE_BASE_XP * mul);
+    statXp[ex.trainsStat] = (statXp[ex.trainsStat] ?? 0) + awarded;
+  }
+  const totalXp = lesson.xpReward;
 
   await db.transaction(async (tx) => {
     // Upsert progress row
@@ -88,11 +110,47 @@ export async function completeLesson(lessonId: string, score: number, statXp: Pa
       .where(eq(profiles.id, user.id));
   });
 
+  // Evaluate achievements against the post-update state. Diff against the user's prior
+  // earnedAchievements list and append any newly-earned ones.
+  const newlyEarned: string[] = [];
+  try {
+    const [post] = await db
+      .select({
+        totalXp: profiles.totalXp,
+        streakDays: profiles.streakDays,
+        earned: profiles.earnedAchievements,
+      })
+      .from(profiles)
+      .where(eq(profiles.id, user.id));
+    const completedRows = await db
+      .select({ lessonId: progress.lessonId })
+      .from(progress)
+      .where(and(eq(progress.userId, user.id), eq(progress.status, "completed")));
+    const ctx = {
+      totalXp: post?.totalXp ?? 0,
+      streakDays: post?.streakDays ?? 0,
+      completedLessonIds: new Set(completedRows.map((r) => r.lessonId)),
+    };
+    const allEarned = evalEarnedAchievements(ctx);
+    const previously = new Set(post?.earned ?? []);
+    for (const id of allEarned) if (!previously.has(id)) newlyEarned.push(id);
+    if (newlyEarned.length > 0) {
+      await db
+        .update(profiles)
+        .set({
+          earnedAchievements: sql`${profiles.earnedAchievements} || ${JSON.stringify(newlyEarned)}::jsonb`,
+        })
+        .where(eq(profiles.id, user.id));
+    }
+  } catch (e) {
+    console.error("achievement check failed", e);
+  }
+
   revalidatePath("/learn");
   revalidatePath("/me");
   revalidatePath("/leaderboard");
 
-  return { totalXp, completed };
+  return { totalXp, completed, statXp, score, newlyEarned };
 }
 
 export async function getProfileWithStats() {

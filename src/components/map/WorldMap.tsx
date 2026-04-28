@@ -16,6 +16,12 @@ export function WorldMap({
 }) {
   const completed = new Set(completedLessonIds);
 
+  function isUnitComplete(unitId: string): boolean {
+    const u = UNITS.find((x) => x.id === unitId);
+    if (!u || u.lessons.length === 0) return false;
+    return u.lessons.every((l) => completed.has(l.id));
+  }
+
   return (
     <div className="relative">
       {/* Sky / mist parallax */}
@@ -70,7 +76,7 @@ export function WorldMap({
         {/* City nodes */}
         {CITIES.map((city, i) => {
           const unit = UNITS.find((u) => u.id === city.unitId);
-          const unlocked = i === 0 || (i <= 1); // Phase 1: only first 2 cities unlocked
+          const unlocked = i === 0 || isUnitComplete(CITIES[i - 1].unitId);
           const lessons = unit?.lessons ?? [];
           const allDone = lessons.length > 0 && lessons.every((l) => completed.has(l.id));
 

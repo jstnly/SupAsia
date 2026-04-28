@@ -156,29 +156,48 @@ Currently `MascotSlot` renders an inline SVG buffalo with 8 palette swaps. To up
 
 ## Phase roadmap
 
-This repo is currently at **Phase 1**.
+This repo is at **end of Phase 2**.
 
 - **Phase 1** (DONE) — Foundation, auth, onboarding, world map, lesson engine + 3 activity types (Listen / Translate / Tone Match), Unit 0 + Unit 1 content, character sheet, friends, leaderboard skeletons, docs.
-- **Phase 2** — Speak (Nói) exercise with mic + `pitchy` pitch-contour grading + Whisper fallback. Pair-match, Fill-blank, Short-story exercises. Skill tree screen + unlock logic. Units 2–4 content. Upgrade Next.js to a security-patched version.
+- **Phase 2** (DONE) — All 7 lesson types: Listen / Translate / Tone Match / Speak (mic + `pitchy` pitch-contour + Web Speech / Whisper-via-Groq fallback) / Pair-match / Fill-blank / Short-story (branching dialogue). Skill tree (4 branches × 6 nodes, XP multipliers + capstone hearts). World map unlock now data-driven from completed lessons. Units 2–4 authored (Đà Lạt / Hội An / Đà Nẵng). Pre-lesson Tips screen with auto-derived vocab + grammar. Hover-tooltip dictionary on Vietnamese words. 12 named achievements. Wrong-answer feedback shows correct answer + meaning. Multiple-choice options shuffle on every replay. PWA manifest. Next.js bumped to 15.5.15 (CVE-2025-66478 patched). `/demo` route bypasses auth for end-to-end testing without Supabase setup.
 - **Phase 3** — Multiplayer Tone Duel (Supabase Realtime broadcast channels). Speed Lesson. Leaderboard refresh cron (Supabase pg_cron). Bậc Trà Sữa league weekly promote/demote.
 - **Phase 4** — Equipment + pets + shop UI. Story campaign (Hành Trình Nam Bắc) + city dialogue bosses. Units 5–8 content. R2 audio cache.
-- **Phase 5** — Co-op modes (Đôi Bạn Học, Ngữ Cảnh, City Raid). Achievements polish + 20 named achievements. Units 9–12 content. Northern dialect unlock pack. PWA + push notifications.
+- **Phase 5** — Co-op modes (Đôi Bạn Học, Ngữ Cảnh, City Raid). More named achievements + animations. Units 9–12 content. Northern dialect unlock pack. Push notifications.
+
+## Phase 2 additions — file map
+
+| Concern | Files |
+|---|---|
+| Speak grading | [src/lib/speech/](src/lib/speech/) — `tone-detect.ts` (pitchy + Pearson correlation vs canonical templates), `use-mic-recorder.ts`, `use-speech-recognition.ts`, `phoneme-match.ts`, `browser-support.ts` |
+| Skill tree | [src/lib/game/skill-tree.ts](src/lib/game/skill-tree.ts) — 24 nodes; [src/server/actions/skill-tree.ts](src/server/actions/skill-tree.ts); [src/app/(app)/skills/](src/app/(app)/skills/) |
+| Achievements | [src/lib/game/achievements.ts](src/lib/game/achievements.ts) (12 named) — checked in `completeLesson`, displayed on /me |
+| Tips / vocab dictionary | [src/lib/curriculum/derive-vocab.ts](src/lib/curriculum/derive-vocab.ts), [src/lib/curriculum/dictionary.ts](src/lib/curriculum/dictionary.ts), [src/components/lesson/LessonTips.tsx](src/components/lesson/LessonTips.tsx), [src/components/ui/word.tsx](src/components/ui/word.tsx) (`<Word>` + `<VietnameseText>`) |
+| Replay shuffle | [src/lib/game/exercise-shuffle.ts](src/lib/game/exercise-shuffle.ts) |
+| Accessibility (mic-optional) | [src/lib/stores/accessibility.ts](src/lib/stores/accessibility.ts) (Zustand persist) |
+| Demo route (no auth) | [src/app/demo/page.tsx](src/app/demo/page.tsx), [src/app/demo/[lessonId]/page.tsx](src/app/demo/[lessonId]/page.tsx) |
+| New schema columns | `profiles.unlocked_skill_nodes` (jsonb), `profiles.earned_achievements` (jsonb) — run `npm run db:push` to apply |
 
 ## Known caveats
 
-- `next@15.1.3` has a security advisory; bump to a patched 15.x in Phase 2.
+- After pulling Phase 2 changes, run `npm run db:push` to add the two new jsonb columns on `profiles`.
+- `GROQ_API_KEY` (already in `.env.local.example`) is consumed by `/api/stt` for Whisper STT fallback when Web Speech API is unavailable.
 - TTS audio is currently fetched per-play and cached in-memory only (`Map` in `audio.ts`). Phase 4 introduces persistent caching to Cloudflare R2 keyed by `sha256(text+voice)`.
-- Anonymous (guest) sign-in must be enabled in the Supabase dashboard (Auth → Providers → Email → "Enable anonymous sign-ins"). If left disabled, the "Try as guest" button errors silently — magic-link and Google still work.
-- The leaderboard view (`leaderboard_weekly`) needs `pg_cron` to refresh; without cron, the page reads from `xp_events` directly (slower but always current). Cron setup is in Phase 3.
-- The world map currently unlocks only the first 2 cities (Mekong + Sài Gòn). To unlock more during dev, edit `src/components/map/WorldMap.tsx` (search for `i <= 1`).
+- Anonymous (guest) sign-in must be enabled in the Supabase dashboard (Auth → Providers → Email → "Enable anonymous sign-ins").
+- The leaderboard view (`leaderboard_weekly`) needs `pg_cron` to refresh; without cron, the page reads from `xp_events` directly. Cron setup is in Phase 3.
+- World map unlock is now data-driven (a city unlocks when the previous unit's lessons are all completed). The hardcoded `i <= 1` was removed.
+- Speak grading is **tone-only**; phoneme/transcript is shown advisory but does not gate. Pitch threshold is 55 (was 70) — Web Speech ASR on Vietnamese is too unreliable to gate.
+- Hydration: any client component that uses `Math.random()` (shuffle, etc.) must defer the randomness to a `useEffect` after mount, otherwise SSR vs client mismatch. See `Lesson.tsx` and `PairMatchExercise.tsx` for the pattern.
 
 ## Quick verification
 
-To confirm Phase 1 still works end-to-end:
-
 ```bash
 npm run dev
+# Auth-free demo (works without Supabase setup):
+# Visit http://localhost:3000/demo and pick any lesson.
+
+# Full flow (requires .env.local + npm run db:push):
 # Visit http://localhost:3000
-# Click "Get started" → magic link to your inbox → click → onboarding → world map
-# Tap Mekong (Unit 0, Lesson 1) → complete a tone-match → confetti → /me shows stats
+# Click "Get started" → magic link → onboarding → world map
+# Mekong (Unit 0) → Sài Gòn (Unit 1) → Đà Lạt (Unit 2) → Hội An (Unit 3) → Đà Nẵng (Unit 4)
+# Reach L5 to unlock the skill tree at /skills.
 ```

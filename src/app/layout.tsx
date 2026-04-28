@@ -10,7 +10,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 });
 
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
   display: "swap",
@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   title: "Biết Tiếng Việt — Learn Vietnamese RPG",
   description:
     "Learn Vietnamese as an RPG: level up stats, unlock cities, and play with friends. Conversational in 2–3 months.",
+  manifest: "/manifest.webmanifest",
+  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  appleWebApp: { capable: true, title: "Biết Tiếng Việt", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ConfettiBurst } from "@/components/game/ConfettiBurst";
 import { MascotSlot } from "@/components/game/MascotSlot";
 import { STAT_META, type StatKey } from "@/lib/game/xp";
+import { ACHIEVEMENT_BY_ID } from "@/lib/game/achievements";
 import type { Lesson } from "@/lib/game/types";
 
 export function LessonResult({
@@ -16,6 +17,7 @@ export function LessonResult({
   savedXp,
   completed,
   saving,
+  newlyEarned = [],
   onContinue,
 }: {
   lesson: Lesson;
@@ -25,6 +27,7 @@ export function LessonResult({
   savedXp: number;
   completed: boolean;
   saving: boolean;
+  newlyEarned?: string[];
   onContinue: () => void;
 }) {
   const accuracy = Math.round((score / total) * 100);
@@ -68,6 +71,35 @@ export function LessonResult({
               </div>
             ))}
           </div>
+        )}
+
+        {newlyEarned.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 180, damping: 18 }}
+            className="mt-5 rounded-2xl border-2 border-[var(--color-gold-300)] bg-gradient-to-br from-[var(--color-gold-50)] to-[var(--color-lotus-50)] p-4 text-left"
+          >
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-gold-700)]">
+              <Trophy size={14} />
+              Achievement unlocked!
+            </div>
+            <div className="mt-2 space-y-1.5">
+              {newlyEarned.map((id) => {
+                const ach = ACHIEVEMENT_BY_ID[id];
+                if (!ach) return null;
+                return (
+                  <div key={id} className="font-display">
+                    <span className="text-sm font-bold">{ach.name}</span>{" "}
+                    <span className="text-xs opacity-70">({ach.nameEnglish})</span>
+                    <div className="text-xs text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
+                      {ach.description}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
         )}
 
         <Button onClick={onContinue} className="mt-6 w-full" size="lg" disabled={saving}>
