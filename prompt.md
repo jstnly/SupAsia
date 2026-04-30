@@ -50,7 +50,7 @@ Units 0–12 covering the full curriculum:
 - Co-op mode (Đôi Bạn Học): shared lesson progress, partner XP sync — `/coop`
 
 ### AI conversation practice
-- `/conversation` — 6 scenarios (café ordering / market bargaining / family introductions / directions / health clinic / restaurant), streaming Claude responses via `claude-opus-4-7`
+- `/conversation` — fully self-hosted (no LLM API). Two tabs: **Practice** (6 scripted branching scenarios with NFC + diacritic-insensitive fuzzy matching) and **Ask Bồ** (~140-entry curated knowledge base — tones, pronouns, grammar, phrases, culture, vocab). Engine in `src/lib/tutor/`
 - Rate limited (30 req/min per user), XP awarded on session end via `completeConversation`
 - System prompt cached with `cache_control: { type: "ephemeral" }` for latency
 
@@ -73,8 +73,9 @@ Units 0–12 covering the full curriculum:
 npm install
 cp .env.local.example .env.local
 # Fill in: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
-#          DATABASE_URL, GOOGLE_TTS_API_KEY, ANTHROPIC_API_KEY
-# Optional: GROQ_API_KEY, NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT,
+#          DATABASE_URL
+# Optional: GOOGLE_TTS_API_KEY (Web Speech fallback if missing), GROQ_API_KEY,
+#           NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT,
 #           R2_*, CRON_SECRET, NEXT_PUBLIC_SITE_URL
 
 npm run db:push

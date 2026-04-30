@@ -13,7 +13,6 @@ const required = [
 const optional = [
   "SUPABASE_SERVICE_ROLE_KEY",
   "GOOGLE_TTS_API_KEY",
-  "ANTHROPIC_API_KEY",
   "GROQ_API_KEY",
   "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
   "VAPID_PRIVATE_KEY",
@@ -44,7 +43,6 @@ export const env = {
   databaseUrl: process.env.DATABASE_URL!,
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
   googleTtsKey: process.env.GOOGLE_TTS_API_KEY,
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
   groqApiKey: process.env.GROQ_API_KEY,
   vapidPublicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
   vapidPrivateKey: process.env.VAPID_PRIVATE_KEY,
