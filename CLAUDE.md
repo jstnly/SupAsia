@@ -23,7 +23,7 @@ A web app that teaches **Southern Vietnamese** to American English speakers, RPG
 | TTS | Google Cloud TTS Neural2 `vi-VN-Neural2-D` (Southern voice). Browser Web Speech API fallback. |
 | STT | Web Speech API + Whisper via Groq for non-Chrome browsers. |
 | Tone grading | `pitchy` library for pitch-contour analysis. |
-| AI tutor | Anthropic `claude-opus-4-7` (streaming, prompt-cached system prompt) |
+| AI tutor | Self-hosted retrieval engine — scripted scenarios + curated knowledge base (no LLM API; zero recurring cost) |
 | State | TanStack Query (server) + Zustand (client) |
 | Deployment | Vercel + Supabase + Cloudflare R2 (audio cache, Phase 4+) |
 
@@ -60,12 +60,11 @@ src/
       duel/[id]/page.tsx             Live duel room (Supabase Realtime)
       coop/page.tsx                  Co-op lobby (Đôi Bạn Học)
       boss/[cityId]/page.tsx         City boss encounter (tone identification)
-      conversation/page.tsx          AI conversation practice hub
-      conversation/ConversationPractice.tsx  Chat UI — 6 scenarios, streaming claude-opus-4-7
+      conversation/page.tsx          Conversation practice + tutor hub (server)
+      conversation/ConversationPractice.tsx  Top-level tab switcher (Practice | Ask Bồ)
     api/
       tts/route.ts                   Google TTS proxy (long-cache headers)
       stt/route.ts                   Whisper-via-Groq STT fallback
-      conversation/route.ts          Claude streaming endpoint (rate-limited, prompt-cached)
       push/send/route.ts             Web-push delivery (POST, cron-secret auth)
       cron/streak-reminders/route.ts Daily streak reminder cron (GET, Vercel cron)
   components/
@@ -74,6 +73,8 @@ src/
                                      MascotSlot (Bồ SVG), ConfettiBurst, StatRadar
     lesson/                          Lesson runner + 7 exercise types + LessonResult + Tips
     map/WorldMap.tsx                 SVG Vietnam silhouette + 13 city nodes + boss links
+    tutor/                           Self-hosted tutor UI — KnowledgeCard, AskBoTab,
+                                     PracticeTab, SuggestionChips
     ErrorBoundary.tsx                React class error boundary
     PushNotificationToggle.tsx       VAPID push subscription UI
     ServiceWorkerRegistrar.tsx       Registers /sw.js on mount
@@ -99,6 +100,12 @@ src/
     curriculum/units.ts              Units 0–12 (all 13 cities), 3000+ LOC curriculum
     curriculum/derive-vocab.ts       Auto-derives vocab list from lesson exercises
     curriculum/dictionary.ts         Word → meaning / tone hint lookup
+    tutor/                           Self-hosted tutor engine + content
+    tutor/match.ts                   Vietnamese-aware fuzzy matching (NFC + diacritic-insensitive)
+    tutor/intent.ts                  Regex-based intent classifier (vocab/tone/grammar/culture)
+    tutor/respond.ts                 Practice + Ask Bồ engine (no LLM)
+    tutor/scenarios.ts               6 scripted scenarios with branching dialogue
+    tutor/knowledge-base.ts          ~50 curated tutor entries (tones, pronouns, grammar, culture)
     speech/                          tone-detect.ts, use-mic-recorder.ts,
                                      use-speech-recognition.ts, phoneme-match.ts,
                                      browser-support.ts
@@ -146,7 +153,6 @@ cp .env.local.example .env.local
 #   DATABASE_URL  (postgres://postgres:PASSWORD@db.PROJECTREF.supabase.co:5432/postgres)
 # Recommended:
 #   GOOGLE_TTS_API_KEY         — falls back to Web Speech API without this
-#   ANTHROPIC_API_KEY          — required for /conversation AI tutor
 #   GROQ_API_KEY               — Whisper STT fallback on non-Chrome
 # Optional (push notifications):
 #   NEXT_PUBLIC_VAPID_PUBLIC_KEY  \
@@ -174,7 +180,7 @@ npm run dev
 ## Conventions
 
 - Server Components by default. Add `"use client"` only when needed (state, refs, browser APIs).
-- Server mutations live in `src/server/actions/*.ts` (Server Actions). Avoid building unnecessary `/api/*` routes (exceptions: TTS proxy, STT, Claude streaming, push delivery — these need streaming or special headers).
+- Server mutations live in `src/server/actions/*.ts` (Server Actions). Avoid building unnecessary `/api/*` routes (exceptions: TTS proxy, STT, push delivery — these need streaming or special headers).
 - Database access only inside server actions or server components — never in client code.
 - Tailwind v4: tokens are defined in `globals.css` via `@theme`. New colors / fonts go there. Reference as `var(--color-...)` in CSS or use Tailwind utility classes.
 - Tones are color-coded AND shape-coded AND letter-coded — never use color alone (accessibility).
@@ -226,7 +232,7 @@ This repo is at **end of Phase 7 — all phases complete**.
 - **Phase 3** (DONE) — Tone Duel multiplayer (`/duel`, Supabase Realtime broadcast). Speed Lesson (`/speed`, 45s timer). Bậc Trà Sữa league (6 tiers, weekly pg_cron promote/demote). Leaderboard materialized view + cron.
 - **Phase 4** (DONE) — Shop UI + items/cosmetics/boosts (`/shop`, gems currency). Units 5–12 authored (all 13 cities: Huế, Ninh Bình, Hạ Long, Hà Nội, Nha Trang, Phú Quốc, Cần Thơ, Sa Pa). City boss encounters (`/boss/[cityId]`) — tone identification, HP bars, XP + gem rewards via `completeBoss`.
 - **Phase 5** (DONE) — Co-op study rooms (`/coop`, Supabase Realtime, 6-char room codes). Northern dialect unlock at L25 + in-app toggle (`SettingsPanel`). 25 named achievements (progress / streak / level / social / city mastery / mastery).
-- **Phase 6** (DONE) — AI conversation practice (`/conversation`): `claude-opus-4-7` streaming, 6 scenarios (café / market / meeting / restaurant / directions / free), prompt-cached system prompt, 30 req/min rate limiter, XP milestones per session. Adaptive learning engine (`src/lib/game/adaptive.ts`): analyzes 7 stat scores, surfaces 3 targeted focus lessons on `/learn`.
+- **Phase 6** (DONE) — Conversation practice + tutor (`/conversation`): self-hosted retrieval engine — no LLM API, zero recurring cost. Two tabs: **Practice** (6 scripted branching scenarios with fuzzy-matched free-text input) and **Ask Bồ** (curated knowledge base of ~50 entries — tones, pronouns, grammar, phrases, culture, pronunciation). XP milestones per session via `completeConversation`. Adaptive learning engine (`src/lib/game/adaptive.ts`): analyzes 7 stat scores, surfaces 3 targeted focus lessons on `/learn`.
 - **Phase 7** (DONE) — PWA service worker (`public/sw.js`): cache-first for static assets + TTS audio, network-first for pages, offline fallback. Push notifications: VAPID infrastructure, `push_subscriptions` table, `/api/push/send` delivery, `/api/cron/streak-reminders` (Vercel cron daily 18:00 UTC). 30-day XP activity heatmap on `/me`. `ErrorBoundary` component + global `error.tsx`. Security headers (`next.config.ts`). In-memory rate limiter (`src/lib/rate-limit.ts`). Env validation module (`src/lib/env.ts`). `vercel.json` cron config.
 
 ## File maps by phase
@@ -271,7 +277,8 @@ This repo is at **end of Phase 7 — all phases complete**.
 
 | Concern | Files |
 |---|---|
-| AI conversation | `src/app/(app)/conversation/`, `src/app/api/conversation/route.ts`, `src/server/actions/conversation.ts` |
+| Self-hosted tutor | `src/lib/tutor/` (match, intent, respond, scenarios, knowledge-base), `src/components/tutor/` (PracticeTab, AskBoTab, KnowledgeCard, SuggestionChips), `src/app/(app)/conversation/` |
+| Conversation XP | `src/server/actions/conversation.ts` |
 | Adaptive engine | `src/lib/game/adaptive.ts` (pure), `src/app/(app)/learn/page.tsx` (integration) |
 
 ### Phase 7
@@ -288,7 +295,7 @@ This repo is at **end of Phase 7 — all phases complete**.
 ## Known caveats
 
 - Run `npm run db:push` after pulling, then apply all three SQL files in the Supabase SQL editor (in order: 0001 → 0002 → 0003).
-- `ANTHROPIC_API_KEY` is required for `/conversation`. Without it the streaming endpoint returns 500.
+- `/conversation` is fully self-hosted (no LLM API, no recurring cost). Knowledge-base content lives in `src/lib/tutor/knowledge-base.ts` and scenario scripts in `src/lib/tutor/scenarios.ts` — both are plain TS arrays you can extend without touching engine code.
 - Push notifications require VAPID keys. Generate with `npx web-push generate-vapid-keys` and set all three VAPID env vars + `VAPID_SUBJECT` (mailto: address). Without them, `PushNotificationToggle` is hidden and the cron is a no-op.
 - `CRON_SECRET` secures `/api/cron/streak-reminders`. Set it in Vercel env and in the Vercel cron config. Without it, the endpoint is open (acceptable for low-traffic dev).
 - `GROQ_API_KEY` is consumed by `/api/stt` for Whisper STT fallback when Web Speech API is unavailable.
@@ -317,7 +324,8 @@ npm run dev
 # Reach L5 → /skills (skill tree)
 # /duel → create room → share ID → Tone Duel
 # /coop → create room → study together
-# /conversation → pick a scenario → chat in Vietnamese with claude-opus-4-7
+# /conversation → Practice tab: pick scenario, chat in Vietnamese with branching NPC dialogue
+#                Ask Bồ tab: type "how do I say apple", "explain the sắc tone", etc.
 # /me → dialect toggle, daily goal, 30-day heatmap, achievements, push notifications
 # /shop → spend gems on cosmetics
 # /speed → race the clock
