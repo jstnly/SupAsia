@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db/client";
 import { profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { Map, User, Users, Trophy } from "lucide-react";
+import { Map, User, Users, Trophy, Sword, MessageCircle } from "lucide-react";
 import { TopBar } from "./TopBar";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -28,8 +28,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 function BottomNav() {
   const items = [
     { href: "/learn", label: "Learn", icon: Map },
+    { href: "/duel", label: "Duel", icon: Sword },
+    { href: "/conversation", label: "Chat", icon: MessageCircle },
     { href: "/leaderboard", label: "Ranks", icon: Trophy },
-    { href: "/friends", label: "Friends", icon: Users },
     { href: "/me", label: "Me", icon: User },
   ];
   return (

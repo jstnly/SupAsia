@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -44,7 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${beVietnamPro.variable} ${inter.variable} ${jetbrains.variable} bg-lacquer-grad`}
     >
-      <body className="bg-lacquer-grad min-h-dvh">{children}</body>
+      <body className="bg-lacquer-grad min-h-dvh">
+        <ServiceWorkerRegistrar />
+        {children}
+      </body>
     </html>
   );
 }

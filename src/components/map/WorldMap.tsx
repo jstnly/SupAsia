@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Lock, Star, Check } from "lucide-react";
+import { Lock, Star, Check, Sword } from "lucide-react";
 import { CITIES, UNITS } from "@/lib/curriculum/units";
 import { MascotSlot } from "@/components/game/MascotSlot";
 import { cn } from "@/lib/utils";
@@ -90,24 +90,30 @@ export function WorldMap({
               transition={{ delay: i * 0.06, type: "spring", stiffness: 200, damping: 20 }}
             >
               {unlocked && unit ? (
-                <Link
-                  href={`/learn/${unit.id}`}
-                  className="group flex flex-col items-center gap-1"
-                >
-                  <div
-                    className={cn(
-                      "grid h-12 w-12 place-items-center rounded-full border-4 shadow-[0_4px_0_0_rgba(26,20,35,0.18)] transition-transform group-hover:-translate-y-0.5",
-                      allDone
-                        ? "border-[var(--color-jade-600)] bg-[var(--color-jade-400)] text-white"
-                        : "border-[var(--color-lotus-700)] bg-[var(--color-lotus-400)] text-white"
-                    )}
+                <div className="group flex flex-col items-center gap-1">
+                  <Link
+                    href={`/learn/${unit.id}`}
+                    className="grid h-12 w-12 place-items-center rounded-full border-4 shadow-[0_4px_0_0_rgba(26,20,35,0.18)] transition-transform hover:-translate-y-0.5"
+                    style={{
+                      borderColor: allDone ? "var(--color-jade-600)" : "var(--color-lotus-700)",
+                      background: allDone ? "var(--color-jade-400)" : "var(--color-lotus-400)",
+                      color: "white",
+                    }}
                   >
                     {allDone ? <Check size={22} /> : <Star size={22} className="fill-white" />}
-                  </div>
+                  </Link>
                   <div className="card-soft px-2 py-1 text-[10px] font-display font-semibold text-[var(--color-lacquer)] whitespace-nowrap">
                     {city.englishName}
                   </div>
-                </Link>
+                  {allDone && (
+                    <Link
+                      href={`/boss/${city.id}`}
+                      className="flex items-center gap-0.5 rounded-full bg-gradient-to-r from-[var(--color-lotus-500)] to-[var(--color-gold-400)] px-2 py-0.5 text-[9px] font-display font-bold text-white hover:-translate-y-0.5 transition-transform whitespace-nowrap"
+                    >
+                      <Sword size={9} /> Boss
+                    </Link>
+                  )}
+                </div>
               ) : (
                 <div className="flex flex-col items-center gap-1 opacity-50">
                   <div className="grid h-10 w-10 place-items-center rounded-full border-3 border-[color-mix(in_oklab,var(--color-lacquer)_30%,transparent)] bg-[color-mix(in_oklab,var(--color-lacquer)_8%,transparent)]">
