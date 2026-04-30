@@ -7,11 +7,11 @@ export default function OfflinePage() {
       <div>
         <h1 className="font-display text-3xl font-extrabold">Không có mạng</h1>
         <p className="mt-1 text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
-          You're offline — connect to continue learning
+          You&apos;re offline — connect to continue learning
         </p>
       </div>
       <p className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)] max-w-xs">
-        Your progress is saved. Lessons you've visited recently are cached and may still be accessible.
+        Your progress is saved. Lessons you&apos;ve visited recently are cached and may still be accessible.
       </p>
       <Link
         href="/learn"
