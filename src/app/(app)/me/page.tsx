@@ -13,8 +13,10 @@ import { Coins, Gem, Flame, ChevronRight, Trophy, ShoppingBag, Sword, BarChart2,
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { formatNumber } from "@/lib/utils";
+import { levelFromTotalXp } from "@/lib/game/xp";
 import { SignOutButton } from "./SignOutButton";
 import { AccessibilityToggle } from "./AccessibilityToggle";
+import { SettingsPanel } from "./SettingsPanel";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 
 export default async function MePage() {
@@ -25,6 +27,7 @@ export default async function MePage() {
   const [profile] = await db.select().from(profiles).where(eq(profiles.id, user.id));
   const [statRow] = await db.select().from(stats).where(eq(stats.userId, user.id));
   if (!profile) redirect("/login");
+  const { level } = levelFromTotalXp(profile.totalXp);
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const recentXp = await db
@@ -230,6 +233,16 @@ export default async function MePage() {
             );
           })}
         </ul>
+      </div>
+
+      {/* Settings */}
+      <div className="card-soft p-5">
+        <h2 className="font-display text-lg font-bold mb-3">Settings</h2>
+        <SettingsPanel
+          currentDialect={profile.dialect}
+          currentDailyGoal={profile.dailyGoalMinutes}
+          userLevel={level}
+        />
       </div>
 
       {/* Accessibility */}

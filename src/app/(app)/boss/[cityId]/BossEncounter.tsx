@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sword, Shield } from "lucide-react";
+import { Heart, Sword, Shield, Gem } from "lucide-react";
 import type { Boss } from "@/lib/game/bosses";
 import { TONES, type ToneId } from "@/lib/game/tones";
 import { ToneBadge } from "@/components/game/ToneBadge";
 import { MascotSlot } from "@/components/game/MascotSlot";
 import { playVietnamese as playAudio } from "@/lib/game/audio";
-import { completeLesson } from "@/server/actions/lesson";
+import { completeBoss, type BossResult } from "@/server/actions/boss";
 
 const BOSS_SYLLABLES = [
   "ma", "má", "mà", "mạ", "ba", "bá", "bà", "bạ",
@@ -44,13 +44,15 @@ export function BossEncounter({ boss, userLevel }: { boss: Boss; userLevel: numb
   const [bossHp, setBossHp] = useState(boss.winThreshold * 10);
   const [playerHp, setPlayerHp] = useState(3);
   const [flash, setFlash] = useState<"hit" | "miss" | null>(null);
+  const [result, setResult] = useState<BossResult | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const currentQ = questions[qIdx];
   const bossHpPct = Math.max(0, (bossHp / (boss.winThreshold * 10)) * 100);
   const playerHpPct = Math.max(0, (playerHp / 3) * 100);
 
   function handleAnswer(tone: ToneId) {
-    if (!currentQ) return;
+    if (!currentQ || flash) return;
     const isCorrect = tone === currentQ.answer;
 
     if (isCorrect) {
@@ -65,9 +67,20 @@ export function BossEncounter({ boss, userLevel }: { boss: Boss; userLevel: numb
     setTimeout(() => {
       setFlash(null);
       const nextIdx = qIdx + 1;
-      if (nextIdx >= TOTAL || playerHp - (isCorrect ? 0 : 1) <= 0) {
-        const won = (isCorrect ? correct + 1 : correct) >= boss.winThreshold;
-        setPhase(won ? "victory" : "defeat");
+      const finalCorrect = isCorrect ? correct + 1 : correct;
+      const finalHp = isCorrect ? playerHp : playerHp - 1;
+
+      if (nextIdx >= TOTAL || finalHp <= 0) {
+        const won = finalCorrect >= boss.winThreshold;
+        if (won) {
+          startTransition(async () => {
+            const res = await completeBoss(boss.id, boss.xpReward, boss.gemsReward, finalCorrect);
+            setResult(res);
+            setPhase("victory");
+          });
+        } else {
+          setPhase("defeat");
+        }
       } else {
         setQIdx(nextIdx);
         playAudio(questions[nextIdx].syllable).catch(() => {});
@@ -94,7 +107,6 @@ export function BossEncounter({ boss, userLevel }: { boss: Boss; userLevel: numb
           qIdx={qIdx}
           total={TOTAL}
           bossHpPct={bossHpPct}
-          playerHpPct={playerHpPct}
           playerHp={playerHp}
           flash={flash}
           onAnswer={handleAnswer}
@@ -106,6 +118,8 @@ export function BossEncounter({ boss, userLevel }: { boss: Boss; userLevel: numb
           boss={boss}
           correct={correct}
           total={TOTAL}
+          result={result}
+          loading={isPending}
           onContinue={() => router.push("/learn")}
         />
       )}
@@ -115,6 +129,8 @@ export function BossEncounter({ boss, userLevel }: { boss: Boss; userLevel: numb
           boss={boss}
           correct={correct}
           total={TOTAL}
+          result={null}
+          loading={false}
           onContinue={() => router.push("/learn")}
         />
       )}
@@ -179,20 +195,18 @@ function IntroPanel({ boss, locked, onStart, onBack }: {
   );
 }
 
-function BattlePanel({ boss, currentQ, qIdx, total, bossHpPct, playerHpPct, playerHp, flash, onAnswer }: {
+function BattlePanel({ boss, currentQ, qIdx, total, bossHpPct, playerHp, flash, onAnswer }: {
   boss: Boss;
   currentQ: { syllable: string; answer: ToneId };
   qIdx: number;
   total: number;
   bossHpPct: number;
-  playerHpPct: number;
   playerHp: number;
   flash: "hit" | "miss" | null;
   onAnswer: (t: ToneId) => void;
 }) {
   return (
     <div className="space-y-4">
-      {/* Boss HP */}
       <div className="space-y-1">
         <div className="flex items-center justify-between text-sm">
           <span className="font-display font-bold">{boss.emoji} {boss.name}</span>
@@ -209,7 +223,6 @@ function BattlePanel({ boss, currentQ, qIdx, total, bossHpPct, playerHpPct, play
         </div>
       </div>
 
-      {/* Player HP */}
       <div className="flex items-center gap-2">
         <Shield size={16} className="text-[var(--color-jade-500)]" />
         <div className="flex gap-1">
@@ -223,7 +236,6 @@ function BattlePanel({ boss, currentQ, qIdx, total, bossHpPct, playerHpPct, play
         </div>
       </div>
 
-      {/* Boss attack */}
       <AnimatePresence mode="wait">
         <motion.div
           key={qIdx}
@@ -244,7 +256,6 @@ function BattlePanel({ boss, currentQ, qIdx, total, bossHpPct, playerHpPct, play
         </motion.div>
       </AnimatePresence>
 
-      {/* Tone options */}
       <div className="grid grid-cols-3 gap-2">
         {TONES.map((t) => (
           <button
@@ -264,8 +275,9 @@ function BattlePanel({ boss, currentQ, qIdx, total, bossHpPct, playerHpPct, play
   );
 }
 
-function OutcomePanel({ won, boss, correct, total, onContinue }: {
-  won: boolean; boss: Boss; correct: number; total: number; onContinue: () => void;
+function OutcomePanel({ won, boss, correct, total, result, loading, onContinue }: {
+  won: boolean; boss: Boss; correct: number; total: number;
+  result: BossResult | null; loading: boolean; onContinue: () => void;
 }) {
   return (
     <div className="flex flex-col items-center gap-6 text-center">
@@ -279,15 +291,33 @@ function OutcomePanel({ won, boss, correct, total, onContinue }: {
         </div>
       </div>
       {won && (
-        <div className="card-soft p-4 space-y-1 text-sm w-full">
-          <div className="font-display font-bold text-[var(--color-gold-600)]">Rewards earned</div>
-          <div>+{boss.xpReward} XP</div>
-          <div>+{boss.gemsReward} 💎 gems</div>
+        <div className="card-soft p-4 space-y-2 text-sm w-full">
+          <div className="font-display font-bold text-[var(--color-gold-600)]">
+            {loading ? "Saving rewards…" : "Rewards earned!"}
+          </div>
+          {!loading && result && (
+            <>
+              <div className="flex items-center justify-between">
+                <span>XP earned</span>
+                <span className="font-bold text-[var(--color-jade-600)]">+{result.xpEarned}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1"><Gem size={14} /> Gems</span>
+                <span className="font-bold text-[var(--color-tone-nga)]">+{result.gemsEarned}</span>
+              </div>
+              {result.newAchievements.length > 0 && (
+                <div className="text-[var(--color-lotus-600)] font-semibold text-xs">
+                  🏆 {result.newAchievements.length} new achievement{result.newAchievements.length > 1 ? "s" : ""} unlocked!
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
       <button
         onClick={onContinue}
-        className="w-full rounded-full bg-gradient-to-r from-[var(--color-jade-500)] to-[var(--color-lotus-500)] py-3 font-display font-bold text-white shadow-[0_4px_0_0_rgba(26,20,35,0.2)]"
+        disabled={won && loading}
+        className="w-full rounded-full bg-gradient-to-r from-[var(--color-jade-500)] to-[var(--color-lotus-500)] py-3 font-display font-bold text-white shadow-[0_4px_0_0_rgba(26,20,35,0.2)] disabled:opacity-60"
       >
         {won ? "Continue Journey" : "Try Again Later"}
       </button>
