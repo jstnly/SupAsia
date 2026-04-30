@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Trophy, Sparkles, Flame } from "lucide-react";
+import { Sparkles, Flame } from "lucide-react";
 import { MascotSlot } from "@/components/game/MascotSlot";
 import { cn, formatNumber } from "@/lib/utils";
+import { PageHero } from "@/components/ui/PageHero";
+import { SectionShell } from "@/components/ui/SectionShell";
 
 type Row = {
   user_id: string;
@@ -36,15 +38,14 @@ export function LeaderboardClient({
 }) {
   return (
     <div className="space-y-4">
-      <div className="card-soft flex items-center gap-3 p-5">
-        <Trophy className="text-[var(--color-gold-500)]" size={28} />
-        <div>
-          <h1 className="font-display text-2xl font-bold">Leaderboard</h1>
-          <div className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
-            Bậc Trà Sữa league rankings
-          </div>
-        </div>
-      </div>
+      <SectionShell section="leaderboard">
+        <PageHero
+          section="leaderboard"
+          eyebrow="Bậc Trà Sữa · Leaderboard"
+          title="Climb the ranks"
+          subtitle="Weekly rankings reset Sunday at midnight. Top 3 in each league get promoted."
+        />
+      </SectionShell>
 
       <div className="flex flex-wrap gap-2">
         <div className="inline-flex rounded-full border border-[var(--color-border)] bg-white p-1">

@@ -14,6 +14,8 @@ import {
 } from "@/lib/game/skill-tree";
 import { unlockSkillNode } from "@/server/actions/skill-tree";
 import { cn } from "@/lib/utils";
+import { PageHero } from "@/components/ui/PageHero";
+import { SectionShell } from "@/components/ui/SectionShell";
 
 export function SkillTree({
   initialLevel,
@@ -44,31 +46,19 @@ export function SkillTree({
 
   return (
     <div className="space-y-6">
-      <div className="card-soft flex flex-wrap items-center gap-4 p-5">
-        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--color-lotus-500)] to-[var(--color-gold-500)] text-white">
-          {isLocked ? <Lock size={26} /> : <Sparkles size={26} />}
-        </div>
-        <div className="flex-1 min-w-[200px]">
-          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-lotus-600)]">
-            Skill Tree
-          </div>
-          {isLocked ? (
-            <>
-              <h1 className="font-display text-2xl font-extrabold">Unlocks at L{SKILL_TREE_UNLOCK_LEVEL}</h1>
-              <div className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
-                You&apos;re at L{level}. Keep finishing lessons to earn skill points.
-              </div>
-            </>
-          ) : (
-            <>
-              <h1 className="font-display text-2xl font-extrabold tabular-nums">{sp} SP available</h1>
-              <div className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
-                Level {level} · {unlocked.length}/24 nodes unlocked
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      <SectionShell section="skills">
+        <PageHero
+          section="skills"
+          eyebrow="Cây Kỹ Năng · Skill Tree"
+          title={isLocked ? `Unlocks at level ${SKILL_TREE_UNLOCK_LEVEL}` : `${sp} SP available`}
+          subtitle={
+            isLocked
+              ? `You're at L${level}. Keep finishing lessons to earn skill points.`
+              : `Level ${level} · ${unlocked.length}/24 nodes unlocked`
+          }
+          emoji={isLocked ? "🔒" : "✨"}
+        />
+      </SectionShell>
 
       {error && (
         <div className="rounded-2xl border-2 border-[var(--color-lotus-300)] bg-[var(--color-lotus-50)] p-3 text-sm">

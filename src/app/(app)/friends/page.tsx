@@ -2,17 +2,30 @@ import { getFriends } from "@/server/actions/social";
 import { AddFriendForm } from "./AddFriendForm";
 import { MascotSlot } from "@/components/game/MascotSlot";
 import { Flame } from "lucide-react";
+import { PageHero } from "@/components/ui/PageHero";
+import { SectionShell } from "@/components/ui/SectionShell";
 
 export default async function FriendsPage() {
   const friends = await getFriends();
 
   return (
     <div className="space-y-6">
-      <div className="card-soft p-6">
-        <h1 className="font-display text-2xl font-bold">Friends</h1>
-        <p className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)] mb-4">
-          Add friends by username. You&apos;ll appear together on the leaderboard and can challenge each other to tone duels.
-        </p>
+      <SectionShell section="friends">
+        <PageHero
+          section="friends"
+          eyebrow="Bạn Bè · Friends"
+          title="Your circle"
+          subtitle="Add friends by username. You'll appear together on the leaderboard and can challenge each other to tone duels."
+          meta={
+            <div className="text-center">
+              <div className="text-[10px] font-display uppercase tracking-wider text-white/80">Friends</div>
+              <div className="font-display text-2xl font-extrabold">{friends.length}</div>
+            </div>
+          }
+        />
+      </SectionShell>
+
+      <div className="card-soft p-5">
         <AddFriendForm />
       </div>
 

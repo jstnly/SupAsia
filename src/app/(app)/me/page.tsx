@@ -18,6 +18,9 @@ import { SignOutButton } from "./SignOutButton";
 import { AccessibilityToggle } from "./AccessibilityToggle";
 import { SettingsPanel } from "./SettingsPanel";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { SectionShell } from "@/components/ui/SectionShell";
+import { HeroPattern } from "@/components/ui/HeroPattern";
+import { getSectionTheme } from "@/lib/ui/sections";
 
 export default async function MePage() {
   const supabase = await createClient();
@@ -67,29 +70,42 @@ export default async function MePage() {
   }
   const maxDayXp = Math.max(...days30.map((d) => d.xp), 1);
 
+  const meTheme = getSectionTheme("me");
+
   return (
     <div className="space-y-6">
-      {/* Hero */}
-      <div className="card-soft flex flex-wrap items-center gap-6 p-6">
-        <div className="grid h-32 w-32 place-items-center rounded-3xl bg-gradient-to-br from-[var(--color-lotus-100)] to-[var(--color-river-mist)]">
-          <MascotSlot size={120} variant={profile.avatarVariant} emote="cheer" />
-        </div>
-        <div className="flex-1 min-w-[200px]">
-          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-lotus-600)]">
-            @{profile.username}
+      {/* Hero — themed gradient banner with mascot */}
+      <SectionShell section="me">
+        <header
+          className="relative overflow-hidden rounded-3xl px-5 py-6 md:px-7 md:py-7 hero-text-light"
+          style={{
+            background: `linear-gradient(135deg, ${meTheme.heroFrom} 0%, ${meTheme.heroTo} 100%)`,
+            boxShadow: "0 1px 0 rgba(255,255,255,0.15) inset, 0 18px 36px -18px rgba(26,20,35,0.45)",
+          }}
+        >
+          <HeroPattern pattern={meTheme.pattern} />
+          <div className="relative flex flex-wrap items-center gap-5">
+            <div className="grid h-28 w-28 shrink-0 place-items-center rounded-3xl bg-white/15 backdrop-blur-sm md:h-32 md:w-32">
+              <MascotSlot size={104} variant={profile.avatarVariant} emote="cheer" />
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <div className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-white/80">
+                @{profile.username} · L{level}
+              </div>
+              <h1 className="mt-1 font-display text-3xl font-extrabold leading-tight md:text-4xl">{profile.displayName}</h1>
+              <div className="mt-1 text-sm text-white/85">
+                {profile.dialect === "southern" ? "Southern (Sài Gòn)" : "Northern (Hà Nội)"} · {profile.dailyGoalMinutes} min/day goal
+              </div>
+              <div className="mt-3"><XPBar totalXp={profile.totalXp} /></div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Stat icon={<Flame className="text-[var(--color-gold-300)]" size={16} />} label="Streak" value={`${profile.streakDays}d`} />
+                <Stat icon={<Coins className="text-[var(--color-gold-300)]" size={16} />} label="Đồng" value={formatNumber(profile.gold)} />
+                <Stat icon={<Gem className="text-[var(--color-river-mist)]" size={16} />} label="Ngọc" value={formatNumber(profile.gems)} />
+              </div>
+            </div>
           </div>
-          <h1 className="font-display text-3xl font-extrabold">{profile.displayName}</h1>
-          <div className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)] mb-3">
-            {profile.dialect === "southern" ? "Southern (Sài Gòn)" : "Northern (Hà Nội)"} · {profile.dailyGoalMinutes} min/day goal
-          </div>
-          <XPBar totalXp={profile.totalXp} />
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Stat icon={<Flame className="text-[var(--color-gold-500)]" size={16} />} label="Streak" value={`${profile.streakDays}d`} />
-            <Stat icon={<Coins className="text-[var(--color-gold-500)]" size={16} />} label="Đồng" value={formatNumber(profile.gold)} />
-            <Stat icon={<Gem className="text-[var(--color-tone-nga)]" size={16} />} label="Ngọc" value={formatNumber(profile.gems)} />
-          </div>
-        </div>
-      </div>
+        </header>
+      </SectionShell>
 
       {/* Stats + Unlocks */}
       <div className="grid gap-6 md:grid-cols-2">
@@ -263,10 +279,10 @@ export default async function MePage() {
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5">
+    <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur-sm">
       {icon}
-      <span className="text-xs uppercase tracking-wider text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">{label}</span>
-      <span className="font-display font-bold tabular-nums">{value}</span>
+      <span className="text-[10px] uppercase tracking-wider text-white/70">{label}</span>
+      <span className="font-display font-bold tabular-nums text-white">{value}</span>
     </div>
   );
 }

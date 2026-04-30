@@ -10,6 +10,8 @@ import { UNITS } from "@/lib/curriculum/units";
 import { STAT_META } from "@/lib/game/xp";
 import { getFocusLessons } from "@/lib/game/adaptive";
 import { Button } from "@/components/ui/button";
+import { PageHero } from "@/components/ui/PageHero";
+import { SectionShell } from "@/components/ui/SectionShell";
 
 export default async function LearnPage() {
   const supabase = await createClient();
@@ -57,33 +59,42 @@ export default async function LearnPage() {
     ? getFocusLessons(UNITS, statScores, completedSet, masteredIds, availableUnitIds, 3)
     : [];
 
+  const totalLessons = UNITS.reduce((n, u) => n + u.lessons.length, 0);
+  const completedCount = completedLessonIds.length;
+
   return (
     <div className="space-y-6">
-      {/* Continue banner */}
-      <div className="card-soft flex flex-wrap items-center justify-between gap-4 p-5">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-lotus-600)]">Continue your journey</div>
-          <h1 className="font-display text-xl font-bold">
-            {nextLesson ? nextLesson.title : "All caught up — more units coming!"}
-          </h1>
-          {nextLesson && (
-            <div className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">{nextLesson.titleEnglish}</div>
-          )}
-        </div>
-        {nextLesson && (
-          <Link href={`/lesson/${nextLesson.id}`}>
-            <Button className="gap-2">Start lesson <ArrowRight size={18} /></Button>
-          </Link>
-        )}
-      </div>
+      <SectionShell section="learn">
+        <PageHero
+          section="learn"
+          title={nextLesson ? `Continue: ${nextLesson.title}` : "All caught up!"}
+          subtitle={nextLesson ? nextLesson.titleEnglish : "More units arriving soon — explore the world map below."}
+          actions={
+            nextLesson && (
+              <Link href={`/lesson/${nextLesson.id}`}>
+                <Button className="gap-2 bg-white text-[var(--color-jade-700)] hover:bg-white/90">
+                  Start lesson <ArrowRight size={18} />
+                </Button>
+              </Link>
+            )
+          }
+          meta={
+            <div className="text-center">
+              <div className="text-[10px] font-display uppercase tracking-wider text-white/80">Progress</div>
+              <div className="font-display text-2xl font-extrabold">{completedCount}<span className="text-sm text-white/70">/{totalLessons}</span></div>
+              <div className="text-[10px] text-white/70">lessons</div>
+            </div>
+          }
+        />
+      </SectionShell>
 
-      {/* Speed lesson */}
+      {/* Speed lesson — themed accent */}
       <Link
         href="/speed"
-        className="card-soft flex items-center gap-3 p-4 transition-transform hover:-translate-y-0.5"
+        className="card-soft flex items-center gap-3 p-4 transition-transform hover:-translate-y-0.5 hover:border-[var(--color-tone-hoi)]"
       >
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--color-gold-400)] to-[var(--color-lotus-400)] text-white">
-          <Zap size={20} />
+        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-[var(--color-tone-hoi)] to-[var(--color-gold-500)] text-white shadow-[0_4px_10px_-4px_var(--color-tone-hoi)]">
+          <Zap size={22} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="font-display text-sm font-bold">Speed Lesson · Tốc Độ</div>
@@ -91,15 +102,18 @@ export default async function LearnPage() {
             Race the clock — 45s timer, +4s per correct
           </div>
         </div>
-        <ArrowRight size={16} className="text-[var(--color-gold-500)]" />
+        <ArrowRight size={18} className="text-[var(--color-tone-hoi)]" />
       </Link>
 
       {/* Adaptive focus */}
       {focusLessons.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Brain size={16} className="text-[var(--color-lotus-500)]" />
-            <h2 className="font-display font-bold text-sm">Focus Practice · Luyện Tập Có Mục Tiêu</h2>
+        <section className="space-y-3">
+          <div className="flex items-baseline gap-2">
+            <div className="grid h-7 w-7 place-items-center rounded-lg bg-[var(--color-lotus-100)] text-[var(--color-lotus-600)]">
+              <Brain size={14} />
+            </div>
+            <h2 className="font-display font-bold text-sm">Focus Practice</h2>
+            <span className="text-[10px] text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">· Luyện tập có mục tiêu</span>
           </div>
           <p className="text-xs text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)] -mt-1">
             Tailored to your weakest skills
@@ -130,10 +144,16 @@ export default async function LearnPage() {
               );
             })}
           </div>
-        </div>
+        </section>
       )}
 
-      <WorldMap completedLessonIds={completedLessonIds} avatarVariant={profile.avatarVariant} />
+      <section>
+        <div className="mb-3 flex items-baseline gap-2">
+          <h2 className="font-display font-bold text-sm">World Map</h2>
+          <span className="text-[10px] text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">· Bản đồ Việt Nam</span>
+        </div>
+        <WorldMap completedLessonIds={completedLessonIds} avatarVariant={profile.avatarVariant} />
+      </section>
     </div>
   );
 }
