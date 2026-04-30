@@ -1,25 +1,20 @@
 import Link from "next/link";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { UNITS } from "@/lib/curriculum/units";
+import { PageHero } from "@/components/ui/PageHero";
+import { SectionShell } from "@/components/ui/SectionShell";
 
 export default function SpeedIndex() {
   return (
     <div className="space-y-6">
-      <div className="card-soft flex items-center gap-4 p-5">
-        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--color-gold-400)] to-[var(--color-lotus-400)] text-white">
-          <Zap size={28} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-lotus-600)]">
-            Speed Lesson · Tốc Độ
-          </div>
-          <h1 className="font-display text-2xl font-extrabold">Race the clock</h1>
-          <p className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
-            45-second clock. +4 seconds for every correct answer. No hearts, no Tips, no feedback —
-            just go.
-          </p>
-        </div>
-      </div>
+      <SectionShell section="speed">
+        <PageHero
+          section="speed"
+          eyebrow="Speed Lesson · Tốc Độ"
+          title="Race the clock"
+          subtitle="45-second timer. +4 seconds for every correct answer. No hearts, no Tips — just go."
+        />
+      </SectionShell>
 
       {UNITS.map((unit) => (
         <div key={unit.id} className="card-soft p-5 space-y-3">

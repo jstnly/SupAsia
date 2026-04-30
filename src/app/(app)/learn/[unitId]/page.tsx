@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, Lock, Star } from "lucide-react";
+import { ArrowRight, Check, Lock, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db/client";
 import { progress } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getUnit, CITIES } from "@/lib/curriculum/units";
 import { Button } from "@/components/ui/button";
+import { PageHero } from "@/components/ui/PageHero";
+import { SectionShell } from "@/components/ui/SectionShell";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function UnitPage({ params }: { params: Promise<{ unitId: string }> }) {
   const { unitId } = await params;
@@ -26,20 +29,28 @@ export default async function UnitPage({ params }: { params: Promise<{ unitId: s
 
   const city = CITIES.find((c) => c.unitId === unit.id);
 
+  const completedCount = unit.lessons.filter((l) => completedSet.has(l.id)).length;
+
   return (
     <div className="space-y-6">
-      <Link href="/learn" className="inline-flex items-center gap-2 text-sm text-[var(--color-lotus-600)]">
-        <ArrowLeft size={16} /> World Map
-      </Link>
-
-      <div className="card-soft p-6">
-        <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-lotus-600)]">
-          Unit {unit.order} {city ? `· ${city.englishName}` : ""}
+      <SectionShell section="learn">
+        <BackLink href="/learn" label="World Map" />
+        <div className="mt-3">
+          <PageHero
+            section="learn"
+            eyebrow={`Unit ${unit.order}${city ? ` · ${city.englishName}` : ""}`}
+            title={unit.title}
+            subtitle={`${unit.titleEnglish} — ${unit.description}`}
+            meta={
+              <div className="text-center">
+                <div className="text-[10px] font-display uppercase tracking-wider text-white/80">Progress</div>
+                <div className="font-display text-2xl font-extrabold">{completedCount}<span className="text-sm text-white/70">/{unit.lessons.length}</span></div>
+                <div className="text-[10px] text-white/70">lessons</div>
+              </div>
+            }
+          />
         </div>
-        <h1 className="font-display text-3xl font-extrabold">{unit.title}</h1>
-        <div className="font-display text-lg text-[color-mix(in_oklab,var(--color-lacquer)_70%,transparent)]">{unit.titleEnglish}</div>
-        <p className="mt-3 text-sm text-[color-mix(in_oklab,var(--color-lacquer)_70%,transparent)]">{unit.description}</p>
-      </div>
+      </SectionShell>
 
       <ol className="space-y-3">
         {unit.lessons.map((lesson, i) => {
