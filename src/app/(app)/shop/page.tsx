@@ -29,7 +29,7 @@ export default async function ShopPage() {
       <SectionShell section="shop">
         <PageHero
           section="shop"
-          eyebrow="Cửa Hàng · Shop"
+          eyebrow="Shop · Cửa Hàng"
           title="Spend your gems"
           subtitle="Cosmetics, boosts, and accessories for Bồ. Earn gems by beating city bosses."
           meta={

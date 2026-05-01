@@ -73,7 +73,7 @@ export function StatRadar({ stats, size = 280 }: { stats: Record<StatKey, number
               fontWeight="600"
               fill={STAT_META[k].color}
             >
-              {STAT_META[k].name}
+              {STAT_META[k].english}
             </text>
             <text
               x={x}

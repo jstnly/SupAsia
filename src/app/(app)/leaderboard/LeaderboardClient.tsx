@@ -41,7 +41,7 @@ export function LeaderboardClient({
       <SectionShell section="leaderboard">
         <PageHero
           section="leaderboard"
-          eyebrow="Bậc Trà Sữa · Leaderboard"
+          eyebrow="Leaderboard · Bậc Trà Sữa"
           title="Climb the ranks"
           subtitle="Weekly rankings reset Sunday at midnight. Top 3 in each league get promoted."
         />

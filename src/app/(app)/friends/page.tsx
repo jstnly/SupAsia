@@ -13,7 +13,7 @@ export default async function FriendsPage() {
       <SectionShell section="friends">
         <PageHero
           section="friends"
-          eyebrow="Bạn Bè · Friends"
+          eyebrow="Friends · Bạn Bè"
           title="Your circle"
           subtitle="Add friends by username. You'll appear together on the leaderboard and can challenge each other to tone duels."
           meta={

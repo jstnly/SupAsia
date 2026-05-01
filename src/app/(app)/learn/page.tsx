@@ -12,6 +12,7 @@ import { getFocusLessons } from "@/lib/game/adaptive";
 import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionShell } from "@/components/ui/SectionShell";
+import { WelcomeBanner } from "@/components/ui/WelcomeBanner";
 
 export default async function LearnPage() {
   const supabase = await createClient();
@@ -61,9 +62,18 @@ export default async function LearnPage() {
 
   const totalLessons = UNITS.reduce((n, u) => n + u.lessons.length, 0);
   const completedCount = completedLessonIds.length;
+  const isBrandNew = profile.totalXp === 0;
+  const firstLesson = UNITS[0]?.lessons[0];
 
   return (
     <div className="space-y-6">
+      {isBrandNew && firstLesson && (
+        <WelcomeBanner
+          displayName={profile.displayName ?? "friend"}
+          firstLessonId={firstLesson.id}
+          avatarVariant={profile.avatarVariant}
+        />
+      )}
       <SectionShell section="learn">
         <PageHero
           section="learn"

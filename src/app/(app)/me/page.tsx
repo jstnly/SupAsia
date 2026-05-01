@@ -109,13 +109,16 @@ export default async function MePage() {
                 {profile.displayName}
               </h1>
               <div className="mt-1 text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
-                {profile.dialect === "southern" ? "Southern (Sài Gòn)" : "Northern (Hà Nội)"} · {profile.dailyGoalMinutes} min/day goal
+                {profile.dialect === "southern"
+                  ? "Southern Vietnamese (Saigon / Sài Gòn)"
+                  : "Northern Vietnamese (Hanoi / Hà Nội)"}{" "}
+                · {profile.dailyGoalMinutes} min/day goal
               </div>
               <div className="mt-3"><XPBar totalXp={profile.totalXp} /></div>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Stat icon={<Flame className="text-[var(--color-gold-500)]" size={16} />} label="Streak" value={`${profile.streakDays}d`} />
-                <Stat icon={<Coins className="text-[var(--color-gold-500)]" size={16} />} label="Đồng" value={formatNumber(profile.gold)} />
-                <Stat icon={<Gem className="text-[var(--color-tone-nga)]" size={16} />} label="Ngọc" value={formatNumber(profile.gems)} />
+                <Stat icon={<Coins className="text-[var(--color-gold-500)]" size={16} />} label="Gold" value={formatNumber(profile.gold)} />
+                <Stat icon={<Gem className="text-[var(--color-tone-nga)]" size={16} />} label="Gems" value={formatNumber(profile.gems)} />
               </div>
             </div>
           </div>
