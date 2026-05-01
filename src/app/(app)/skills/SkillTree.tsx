@@ -49,7 +49,7 @@ export function SkillTree({
       <SectionShell section="skills">
         <PageHero
           section="skills"
-          eyebrow="Cây Kỹ Năng · Skill Tree"
+          eyebrow="Skill Tree · Cây Kỹ Năng"
           title={isLocked ? `Unlocks at level ${SKILL_TREE_UNLOCK_LEVEL}` : `${sp} SP available`}
           subtitle={
             isLocked

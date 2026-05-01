@@ -23,7 +23,7 @@ export function ConversationPractice({
       <SectionShell section="conversation">
         <PageHero
           section="conversation"
-          eyebrow="Hội Thoại · Conversation"
+          eyebrow="Conversation · Hội Thoại"
           title="Chat & Learn with Bồ"
           subtitle="Practice real-life scenarios or ask Bồ to explain anything about Vietnamese — vocab, tones, grammar, culture."
         />
