@@ -192,6 +192,38 @@ export function BeginnerHelp() {
                       </>
                     }
                   />
+
+                  <Section
+                    emoji="🧠"
+                    title="How to learn fastest"
+                    body={
+                      <>
+                        Three habits backed by decades of memory research:
+                        <ul className="mt-2 space-y-1.5 text-[13px]">
+                          <li>
+                            <strong>Daily, not marathon</strong> — 10 minutes every day beats
+                            two hours on Saturday. The streak pushes you toward this.
+                          </li>
+                          <li>
+                            <strong>Review before learning new</strong> — when the green
+                            &ldquo;Reviews due&rdquo; card shows up on Learn, do it first.
+                            We schedule each lesson to come back at the moment you&apos;re
+                            about to forget it (spaced repetition).
+                          </li>
+                          <li>
+                            <strong>Be honest with the rating</strong> — at the end of every
+                            lesson, you&apos;ll see Again / Hard / Good / Easy. Tap what
+                            actually matches how you felt. Lying inflates the schedule and
+                            you&apos;ll forget the words anyway.
+                          </li>
+                          <li>
+                            <strong>Speak out loud</strong> — even alone. Vietnamese tones
+                            live in the muscles of your mouth, not just your eyes.
+                          </li>
+                        </ul>
+                      </>
+                    }
+                  />
                 </div>
 
                 <div className="mt-6 rounded-2xl bg-white p-4 text-center text-xs text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">

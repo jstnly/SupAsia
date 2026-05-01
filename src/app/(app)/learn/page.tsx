@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionShell } from "@/components/ui/SectionShell";
 import { WelcomeBanner } from "@/components/ui/WelcomeBanner";
+import { getReviewSummary } from "@/server/actions/study";
 
 export default async function LearnPage() {
   const supabase = await createClient();
@@ -64,6 +65,7 @@ export default async function LearnPage() {
   const completedCount = completedLessonIds.length;
   const isBrandNew = profile.totalXp === 0;
   const firstLesson = UNITS[0]?.lessons[0];
+  const reviewSummary = await getReviewSummary();
 
   return (
     <div className="space-y-6">
@@ -97,6 +99,28 @@ export default async function LearnPage() {
           }
         />
       </SectionShell>
+
+      {/* Daily review CTA — only when items are due */}
+      {reviewSummary.dueNow > 0 && (
+        <Link
+          href="/review"
+          className="flex items-center gap-3 rounded-3xl bg-gradient-to-r from-[color-mix(in_oklab,var(--color-jade-500)_18%,white)] to-[color-mix(in_oklab,var(--color-jade-500)_8%,white)] p-4 transition-transform hover:-translate-y-0.5"
+          style={{ border: "1.5px solid color-mix(in oklab, var(--color-jade-500) 30%, transparent)" }}
+        >
+          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-[var(--color-jade-400)] to-[var(--color-jade-600)] text-white shadow-[0_4px_10px_-4px_var(--color-jade-500)]">
+            <Brain size={22} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-display text-sm font-bold">
+              {reviewSummary.dueNow} review{reviewSummary.dueNow === 1 ? "" : "s"} due today
+            </div>
+            <div className="text-xs text-[color-mix(in_oklab,var(--color-lacquer)_65%,transparent)]">
+              Spaced repetition keeps lessons fresh — review what&apos;s due before learning new
+            </div>
+          </div>
+          <ArrowRight size={18} className="text-[var(--color-jade-700)]" />
+        </Link>
+      )}
 
       {/* Speed lesson — themed accent */}
       <Link
