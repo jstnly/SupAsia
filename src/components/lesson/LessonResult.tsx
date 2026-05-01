@@ -1,13 +1,16 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Trophy } from "lucide-react";
+import { Sparkles, Trophy, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfettiBurst } from "@/components/game/ConfettiBurst";
 import { MascotSlot } from "@/components/game/MascotSlot";
 import { STAT_META, type StatKey } from "@/lib/game/xp";
 import { ACHIEVEMENT_BY_ID } from "@/lib/game/achievements";
 import type { Lesson } from "@/lib/game/types";
+import { REVIEW_RATINGS, type ReviewRating } from "@/lib/study/srs";
+import { recordReview } from "@/server/actions/study";
 
 export function LessonResult({
   lesson,
@@ -32,6 +35,20 @@ export function LessonResult({
 }) {
   const accuracy = Math.round((score / total) * 100);
   const statEntries = Object.entries(statXp) as [StatKey, number][];
+  const [pickedRating, setPickedRating] = useState<ReviewRating | null>(null);
+  const [scheduledIn, setScheduledIn] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  function pick(rating: ReviewRating) {
+    if (pickedRating !== null) return;
+    setPickedRating(rating);
+    startTransition(async () => {
+      const r = await recordReview(lesson.id, rating);
+      if (r.ok) {
+        setScheduledIn(r.intervalDays === 0 ? "today" : r.intervalDays === 1 ? "tomorrow" : `in ${r.intervalDays} days`);
+      }
+    });
+  }
 
   return (
     <div className="relative grid min-h-dvh place-items-center px-6 py-10">
@@ -102,8 +119,53 @@ export function LessonResult({
           </motion.div>
         )}
 
-        <Button onClick={onContinue} className="mt-6 w-full" size="lg" disabled={saving}>
-          {saving ? "Saving…" : "Continue"}
+        {completed && (
+          <div className="mt-6 rounded-2xl bg-[var(--color-silk-cream)] p-4 text-left">
+            <div className="flex items-center gap-2 text-[11px] font-display font-bold uppercase tracking-wider text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
+              <Brain size={13} className="text-[var(--color-jade-600)]" />
+              How well did you remember?
+            </div>
+            <p className="mt-1 text-[11px] text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">
+              We&apos;ll resurface this lesson at the perfect time using spaced repetition.
+            </p>
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {REVIEW_RATINGS.map((r) => {
+                const isPicked = pickedRating === r.value;
+                const isDimmed = pickedRating !== null && !isPicked;
+                return (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => pick(r.value)}
+                    disabled={pending || pickedRating !== null}
+                    title={r.description}
+                    className="rounded-xl border-2 px-2 py-2.5 text-center transition-all active:translate-y-0.5 disabled:cursor-not-allowed"
+                    style={{
+                      borderColor: r.color,
+                      background: isPicked ? r.color : "white",
+                      color: isPicked ? "white" : r.color,
+                      opacity: isDimmed ? 0.4 : 1,
+                    }}
+                  >
+                    <div className="font-display text-xs font-extrabold">{r.label}</div>
+                  </button>
+                );
+              })}
+            </div>
+            {scheduledIn && (
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 text-center text-xs font-display font-semibold text-[var(--color-jade-700)]"
+              >
+                ✓ Next review: {scheduledIn}
+              </motion.div>
+            )}
+          </div>
+        )}
+
+        <Button onClick={onContinue} className="mt-4 w-full" size="lg" disabled={saving}>
+          {saving ? "Saving…" : pickedRating !== null ? "Continue" : completed ? "Skip rating →" : "Continue"}
         </Button>
       </motion.div>
     </div>

@@ -126,6 +126,7 @@ drizzle/
                                      leaderboard_weekly materialized view
   0002_league_cron_shop.sql          League promote/demote pg_cron + shop items seed
   0003_push_subscriptions.sql        push_subscriptions table + streak-reminder cron
+  0004_srs_columns.sql               SRS columns on progress (interval/ease/lapses/next-review)
 public/
   sw.js                              Service worker — cache-first audio/static, network-first pages
   manifest.webmanifest               PWA manifest
@@ -167,6 +168,7 @@ npm run db:push
 #    drizzle/0001_rls_and_triggers.sql
 #    drizzle/0002_league_cron_shop.sql
 #    drizzle/0003_push_subscriptions.sql
+#    drizzle/0004_srs_columns.sql
 
 # 6. (recommended) Supabase Auth → URL Config:
 #    Site URL = http://localhost:3000

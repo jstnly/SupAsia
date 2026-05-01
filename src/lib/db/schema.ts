@@ -59,10 +59,18 @@ export const progress = pgTable(
     bestScore: integer("best_score").notNull().default(0),
     attempts: integer("attempts").notNull().default(0),
     completedAt: timestamp("completed_at"),
+    // Spaced repetition (SM-2-lite). Driven by recordReview() server action.
+    intervalDays: integer("interval_days").notNull().default(0),
+    easeFactor: integer("ease_factor").notNull().default(250), // stored × 100 to avoid floats; 250 = 2.5
+    reviews: integer("reviews").notNull().default(0),
+    lapses: integer("lapses").notNull().default(0),
+    nextReviewAt: timestamp("next_review_at"),
+    lastReviewedAt: timestamp("last_reviewed_at"),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.userId, t.lessonId] }),
     statusIdx: index("progress_status_idx").on(t.userId, t.status),
+    dueIdx: index("progress_next_review_idx").on(t.userId, t.nextReviewAt),
   })
 );
 
