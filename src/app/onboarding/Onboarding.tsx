@@ -13,13 +13,14 @@ import { TONES } from "@/lib/game/tones";
 import { playVietnamese } from "@/lib/game/audio";
 import { completeOnboarding } from "@/server/actions/profile";
 import { cn } from "@/lib/utils";
+import { TermHint } from "@/components/ui/TermHint";
 
 type Step = 0 | 1 | 2 | 3 | 4;
 
 const STARTER_BUFFS = [
-  { id: "listener" as const, name: "The Listener", boost: "+10% Thính (listening) XP", icon: "👂" },
-  { id: "speaker" as const, name: "The Speaker",   boost: "+10% Khẩu (speaking) XP", icon: "🗣️" },
-  { id: "reader" as const,  name: "The Reader",    boost: "+10% Văn (reading) XP", icon: "📜" },
+  { id: "listener" as const, name: "The Listener", boost: "+10% Listening XP", icon: "👂" },
+  { id: "speaker" as const, name: "The Speaker",   boost: "+10% Speaking XP", icon: "🗣️" },
+  { id: "reader" as const,  name: "The Reader",    boost: "+10% Reading XP", icon: "📜" },
 ];
 
 const MOTIVATIONS = [
@@ -76,17 +77,25 @@ export function Onboarding({ initialDisplayName }: { initialDisplayName: string 
             {step === 0 && (
               <motion.div key="0" {...stepAnim} className="text-center">
                 <MascotSlot size={140} emote="cheer" />
-                <h2 className="font-display text-3xl font-extrabold mt-4">Chào em! I&apos;m Bồ.</h2>
+                <h2 className="font-display text-3xl font-extrabold mt-4">
+                  <TermHint en="Hi there! (informal)">Chào em</TermHint>! I&apos;m{" "}
+                  <TermHint en="baby water buffalo — pronounced 'bo'">Bồ</TermHint>.
+                </h2>
                 <p className="mt-3 text-[color-mix(in_oklab,var(--color-lacquer)_70%,transparent)]">
-                  I&apos;ll be your buffalo guide on the journey from Mekong to Hà Nội.
-                  We&apos;ll learn <strong>Southern Vietnamese</strong> together — the dialect of Sài Gòn streets and family kitchens.
+                  I&apos;ll be your buffalo guide on the journey from the Mekong Delta to{" "}
+                  <TermHint en="Hanoi (capital city, north)">Hà Nội</TermHint>.
+                  We&apos;ll learn <strong>Southern Vietnamese</strong> together — the dialect of{" "}
+                  <TermHint en="Saigon / Ho Chi Minh City (south)">Sài Gòn</TermHint> streets and family kitchens.
+                </p>
+                <p className="mt-2 text-xs text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">
+                  💡 Hover or tap any underlined word to see what it means.
                 </p>
               </motion.div>
             )}
 
             {step === 1 && (
               <motion.div key="1" {...stepAnim}>
-                <h2 className="font-display text-2xl font-bold">Pick your Bồ</h2>
+                <h2 className="font-display text-2xl font-bold">Pick your buffalo</h2>
                 <p className="mb-4 text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
                   Your buddy comes in 8 colors. Pick what speaks to you.
                 </p>
@@ -123,8 +132,12 @@ export function Onboarding({ initialDisplayName }: { initialDisplayName: string 
             {step === 2 && (
               <motion.div key="2" {...stepAnim}>
                 <h2 className="font-display text-2xl font-bold">Listen — these are tones</h2>
-                <p className="mb-4 text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
-                  In Vietnamese, the same word changes meaning by tone. Tap each to hear it.
+                <p className="mb-2 text-sm text-[color-mix(in_oklab,var(--color-lacquer)_70%,transparent)]">
+                  Vietnamese is a <strong>tonal language</strong>. The same syllable said with a
+                  different pitch is a different word. Don&apos;t worry — you&apos;ll feel them out with practice.
+                </p>
+                <p className="mb-4 text-xs text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">
+                  Tap each example below to hear it. Same letters &ldquo;ma&rdquo; — five different meanings.
                 </p>
                 <div className="space-y-2">
                   {TONES.filter((t) => !t.southernMerged || t.id === "hoi").map((tone) => (
@@ -132,14 +145,20 @@ export function Onboarding({ initialDisplayName }: { initialDisplayName: string 
                       key={tone.id}
                       onClick={() => playVietnamese(tone.example)}
                       className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-white p-3 hover:bg-[var(--color-silk-cream)] transition-colors"
+                      aria-label={`Play ${tone.english} tone — ${tone.example} means ${tone.exampleMeaning}`}
                     >
                       <div className="flex items-center gap-3">
                         <ToneBadge toneId={tone.id} size="md" />
                         <div className="text-left">
-                          <div className="font-display text-lg font-semibold">{tone.example}</div>
+                          <div className="font-display text-lg font-semibold">
+                            {tone.example}{" "}
+                            <span className="text-xs font-normal text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">
+                              ({tone.english} tone)
+                            </span>
+                          </div>
                           <div className="text-xs text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">
-                            {tone.exampleMeaning}
-                            {tone.id === "hoi" && " (hỏi/ngã merged in South)"}
+                            means &ldquo;{tone.exampleMeaning}&rdquo;
+                            {tone.id === "hoi" && " · in Southern speech, hỏi & ngã sound the same"}
                           </div>
                         </div>
                       </div>

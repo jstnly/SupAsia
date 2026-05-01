@@ -19,7 +19,6 @@ import { AccessibilityToggle } from "./AccessibilityToggle";
 import { SettingsPanel } from "./SettingsPanel";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { SectionShell } from "@/components/ui/SectionShell";
-import { HeroPattern } from "@/components/ui/HeroPattern";
 import { getSectionTheme } from "@/lib/ui/sections";
 
 export default async function MePage() {
@@ -316,15 +315,21 @@ function LeagueCard({ leagueId }: { leagueId: string }) {
         <span className="text-4xl">{league.emoji}</span>
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-lotus-700)]">
-            Bậc Trà Sữa · {league.english}
+            League · Bậc Trà Sữa
           </div>
-          <div className="font-display text-xl font-extrabold">{league.name}</div>
+          <div className="font-display text-xl font-extrabold">
+            {league.english}{" "}
+            <span className="text-sm font-normal text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">
+              ({league.name})
+            </span>
+          </div>
         </div>
       </div>
       <div className="flex gap-1">
         {LEAGUES.map((l, i) => (
           <div
             key={l.id}
+            title={`${l.english} (${l.name}) — ${l.minXpWeekly}+ weekly XP`}
             className={cn(
               "h-2 flex-1 rounded-full",
               i <= leagueIdx
@@ -336,7 +341,8 @@ function LeagueCard({ leagueId }: { leagueId: string }) {
       </div>
       {next && (
         <div className="text-xs text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">
-          Next: {next.emoji} <span className="font-semibold">{next.name}</span> · earn {next.minXpWeekly} weekly XP
+          Next: {next.emoji} <span className="font-semibold">{next.english}</span>{" "}
+          <span className="opacity-70">({next.name})</span> · earn {next.minXpWeekly} weekly XP
         </div>
       )}
     </div>

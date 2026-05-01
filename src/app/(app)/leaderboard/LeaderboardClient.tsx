@@ -6,6 +6,7 @@ import { MascotSlot } from "@/components/game/MascotSlot";
 import { cn, formatNumber } from "@/lib/utils";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionShell } from "@/components/ui/SectionShell";
+import { getLeague } from "@/lib/game/league";
 
 type Row = {
   user_id: string;
@@ -92,7 +93,9 @@ export function LeaderboardClient({
             </p>
           </div>
         ) : (
-          rows.map((row, i) => (
+          rows.map((row, i) => {
+            const league = getLeague(row.league);
+            return (
             <li key={row.user_id} className={cn("card-soft flex items-center gap-3 p-3", i < 3 && "ring-1 ring-[var(--color-gold-300)]")}>
               <div className={cn(
                 "grid h-9 w-9 place-items-center rounded-full font-display font-bold",
@@ -104,20 +107,31 @@ export function LeaderboardClient({
                 {i + 1}
               </div>
               <MascotSlot size={42} variant={row.avatar_variant} />
-              <div className="flex-1">
-                <div className="font-display font-semibold leading-tight">{row.display_name}</div>
-                <div className="text-xs text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">@{row.username}</div>
+              <div className="min-w-0 flex-1">
+                <div className="font-display font-semibold leading-tight truncate">{row.display_name}</div>
+                <div className="flex items-center gap-1.5 text-xs text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">
+                  <span className="truncate">@{row.username}</span>
+                  <span aria-hidden>·</span>
+                  <span
+                    className="inline-flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-display font-semibold"
+                    style={{ background: `color-mix(in oklab, ${league.color} 18%, white)`, color: league.color }}
+                    title={`${league.english} (${league.name}) league`}
+                  >
+                    <span aria-hidden>{league.emoji}</span> {league.english}
+                  </span>
+                </div>
               </div>
-              <div className="inline-flex items-center gap-1 text-sm">
+              <div className="inline-flex items-center gap-1 text-sm" title="Day streak">
                 <Flame size={14} className="text-[var(--color-gold-500)]" />
                 <span className="font-display font-bold tabular-nums">{row.streak_days}</span>
               </div>
-              <div className="inline-flex items-center gap-1 text-sm">
+              <div className="inline-flex items-center gap-1 text-sm" title="XP this period">
                 <Sparkles size={14} className="text-[var(--color-lotus-500)]" />
                 <span className="font-display font-bold tabular-nums">{formatNumber(row.period_xp)}</span>
               </div>
             </li>
-          ))
+          );
+          })
         )}
       </ol>
     </div>
