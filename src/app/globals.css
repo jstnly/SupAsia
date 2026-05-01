@@ -128,11 +128,13 @@
     box-shadow: 0 1px 0 rgba(26, 20, 35, 0.04), 0 12px 30px -12px color-mix(in oklab, var(--section-accent, var(--color-lacquer)) 35%, transparent);
   }
 
-  /* Tinted page backdrop. Set --section-wash-from / --section-wash-to on the wrapper. */
+  /* Tinted page backdrop. Set --section-wash-from / --section-wash-to on the wrapper.
+     Kept very subtle so the cream background still reads, just with a gentle hint of the
+     section color in the corners. */
   .section-wash {
     background:
-      radial-gradient(60% 50% at 8% 0%, var(--section-wash-from, transparent) 0%, transparent 70%),
-      radial-gradient(70% 60% at 100% 100%, var(--section-wash-to, transparent) 0%, transparent 70%),
+      radial-gradient(50% 40% at 0% 0%, var(--section-wash-from, transparent) 0%, transparent 80%),
+      radial-gradient(50% 40% at 100% 100%, var(--section-wash-to, transparent) 0%, transparent 80%),
       var(--color-silk-cream);
   }
 

@@ -18,7 +18,7 @@ export default async function FriendsPage() {
           subtitle="Add friends by username. You'll appear together on the leaderboard and can challenge each other to tone duels."
           meta={
             <div className="text-center">
-              <div className="text-[10px] font-display uppercase tracking-wider text-white/80">Friends</div>
+              <div className="text-[10px] font-display uppercase tracking-wider text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">Friends</div>
               <div className="font-display text-2xl font-extrabold">{friends.length}</div>
             </div>
           }

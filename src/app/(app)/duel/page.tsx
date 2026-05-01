@@ -15,9 +15,9 @@ export default async function DuelPage() {
           subtitle="10 rounds, head-to-head. Tap the correct tone faster than your opponent to score."
           meta={
             <div className="text-center">
-              <div className="text-[10px] font-display uppercase tracking-wider text-white/80">Recent</div>
+              <div className="text-[10px] font-display uppercase tracking-wider text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">Recent</div>
               <div className="font-display text-2xl font-extrabold">{recent.length}</div>
-              <div className="text-[10px] text-white/70">duels</div>
+              <div className="text-[10px] text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">duels</div>
             </div>
           }
         />
