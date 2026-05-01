@@ -72,7 +72,7 @@ export default async function LearnPage() {
           actions={
             nextLesson && (
               <Link href={`/lesson/${nextLesson.id}`}>
-                <Button className="gap-2 bg-white text-[var(--color-jade-700)] hover:bg-white/90">
+                <Button className="gap-2">
                   Start lesson <ArrowRight size={18} />
                 </Button>
               </Link>
@@ -80,9 +80,9 @@ export default async function LearnPage() {
           }
           meta={
             <div className="text-center">
-              <div className="text-[10px] font-display uppercase tracking-wider text-white/80">Progress</div>
-              <div className="font-display text-2xl font-extrabold">{completedCount}<span className="text-sm text-white/70">/{totalLessons}</span></div>
-              <div className="text-[10px] text-white/70">lessons</div>
+              <div className="text-[10px] font-display uppercase tracking-wider text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">Progress</div>
+              <div className="font-display text-2xl font-extrabold text-[var(--color-jade-700)]">{completedCount}<span className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">/{totalLessons}</span></div>
+              <div className="text-[10px] text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">lessons</div>
             </div>
           }
         />

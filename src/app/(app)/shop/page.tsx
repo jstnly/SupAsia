@@ -34,9 +34,9 @@ export default async function ShopPage() {
           subtitle="Cosmetics, boosts, and accessories for Bồ. Earn gems by beating city bosses."
           meta={
             <div className="text-center">
-              <div className="text-[10px] font-display uppercase tracking-wider text-white/80">Wallet</div>
+              <div className="text-[10px] font-display uppercase tracking-wider text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">Wallet</div>
               <div className="font-display text-2xl font-extrabold">💎 {wallet.gems}</div>
-              <div className="text-[10px] text-white/70">gems</div>
+              <div className="text-[10px] text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">gems</div>
             </div>
           }
         />

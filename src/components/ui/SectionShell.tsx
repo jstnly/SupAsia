@@ -28,7 +28,7 @@ export function SectionShell({
   } as React.CSSProperties;
 
   return (
-    <div data-section={section} style={style} className={`section-wash -mx-4 -mt-4 px-4 pt-4 pb-2 rounded-b-3xl ${className}`}>
+    <div data-section={section} style={style} className={`section-wash -mx-4 -mt-4 px-4 pt-4 pb-2 ${className}`}>
       {children}
     </div>
   );

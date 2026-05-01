@@ -74,33 +74,48 @@ export default async function MePage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero — themed gradient banner with mascot */}
+      {/* Hero — light card with mascot + identity + key stats */}
       <SectionShell section="me">
         <header
-          className="relative overflow-hidden rounded-3xl px-5 py-6 md:px-7 md:py-7 hero-text-light"
+          className="relative rounded-3xl bg-white px-5 py-5 md:px-6 md:py-6"
           style={{
-            background: `linear-gradient(135deg, ${meTheme.heroFrom} 0%, ${meTheme.heroTo} 100%)`,
-            boxShadow: "0 1px 0 rgba(255,255,255,0.15) inset, 0 18px 36px -18px rgba(26,20,35,0.45)",
+            border: "1px solid var(--color-border)",
+            boxShadow: "0 1px 0 rgba(26,20,35,0.04), 0 12px 28px -16px rgba(26,20,35,0.18)",
           }}
         >
-          <HeroPattern pattern={meTheme.pattern} />
-          <div className="relative flex flex-wrap items-center gap-5">
-            <div className="grid h-28 w-28 shrink-0 place-items-center rounded-3xl bg-white/15 backdrop-blur-sm md:h-32 md:w-32">
-              <MascotSlot size={104} variant={profile.avatarVariant} emote="cheer" />
+          <span
+            aria-hidden
+            className="absolute left-5 right-5 top-0 h-1 rounded-b-full md:left-6 md:right-6"
+            style={{ background: meTheme.accent }}
+          />
+          <div className="flex flex-wrap items-center gap-5">
+            <div
+              className="grid h-24 w-24 shrink-0 place-items-center rounded-3xl md:h-28 md:w-28"
+              style={{
+                background: `color-mix(in oklab, ${meTheme.accent} 12%, white)`,
+                border: `1.5px solid color-mix(in oklab, ${meTheme.accent} 28%, transparent)`,
+              }}
+            >
+              <MascotSlot size={88} variant={profile.avatarVariant} emote="cheer" />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <div className="text-[11px] font-display font-bold uppercase tracking-[0.18em] text-white/80">
+              <div
+                className="text-[11px] font-display font-bold uppercase tracking-[0.14em]"
+                style={{ color: meTheme.accentStrong }}
+              >
                 @{profile.username} · L{level}
               </div>
-              <h1 className="mt-1 font-display text-3xl font-extrabold leading-tight md:text-4xl">{profile.displayName}</h1>
-              <div className="mt-1 text-sm text-white/85">
+              <h1 className="mt-1 font-display text-2xl font-extrabold leading-tight text-[var(--color-lacquer)] md:text-3xl">
+                {profile.displayName}
+              </h1>
+              <div className="mt-1 text-sm text-[color-mix(in_oklab,var(--color-lacquer)_60%,transparent)]">
                 {profile.dialect === "southern" ? "Southern (Sài Gòn)" : "Northern (Hà Nội)"} · {profile.dailyGoalMinutes} min/day goal
               </div>
               <div className="mt-3"><XPBar totalXp={profile.totalXp} /></div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Stat icon={<Flame className="text-[var(--color-gold-300)]" size={16} />} label="Streak" value={`${profile.streakDays}d`} />
-                <Stat icon={<Coins className="text-[var(--color-gold-300)]" size={16} />} label="Đồng" value={formatNumber(profile.gold)} />
-                <Stat icon={<Gem className="text-[var(--color-river-mist)]" size={16} />} label="Ngọc" value={formatNumber(profile.gems)} />
+                <Stat icon={<Flame className="text-[var(--color-gold-500)]" size={16} />} label="Streak" value={`${profile.streakDays}d`} />
+                <Stat icon={<Coins className="text-[var(--color-gold-500)]" size={16} />} label="Đồng" value={formatNumber(profile.gold)} />
+                <Stat icon={<Gem className="text-[var(--color-tone-nga)]" size={16} />} label="Ngọc" value={formatNumber(profile.gems)} />
               </div>
             </div>
           </div>
@@ -279,10 +294,10 @@ export default async function MePage() {
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur-sm">
+    <div className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_oklab,var(--color-lacquer)_5%,transparent)] px-3 py-1.5">
       {icon}
-      <span className="text-[10px] uppercase tracking-wider text-white/70">{label}</span>
-      <span className="font-display font-bold tabular-nums text-white">{value}</span>
+      <span className="text-[10px] uppercase tracking-wider text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">{label}</span>
+      <span className="font-display font-bold tabular-nums text-[var(--color-lacquer)]">{value}</span>
     </div>
   );
 }

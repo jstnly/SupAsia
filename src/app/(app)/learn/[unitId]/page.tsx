@@ -43,9 +43,9 @@ export default async function UnitPage({ params }: { params: Promise<{ unitId: s
             subtitle={`${unit.titleEnglish} — ${unit.description}`}
             meta={
               <div className="text-center">
-                <div className="text-[10px] font-display uppercase tracking-wider text-white/80">Progress</div>
-                <div className="font-display text-2xl font-extrabold">{completedCount}<span className="text-sm text-white/70">/{unit.lessons.length}</span></div>
-                <div className="text-[10px] text-white/70">lessons</div>
+                <div className="text-[10px] font-display uppercase tracking-wider text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">Progress</div>
+                <div className="font-display text-2xl font-extrabold">{completedCount}<span className="text-sm text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">/{unit.lessons.length}</span></div>
+                <div className="text-[10px] text-[color-mix(in_oklab,var(--color-lacquer)_55%,transparent)]">lessons</div>
               </div>
             }
           />
